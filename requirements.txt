@@ -1,0 +1,5 @@
+pyhanko[opentype]>=0.38.0
+cryptography>=42
+pikepdf>=8
+pymupdf>=1.24
+Pillow>=10

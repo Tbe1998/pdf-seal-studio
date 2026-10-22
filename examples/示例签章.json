@@ -1,0 +1,93 @@
+{
+  "_说明": "示例签章配置（内容全部虚构）。rect=[x,y,宽,高] 单位 pt，origin=top-left 为页面左上角原点。",
+  "input": "examples/示例监测日报.pdf",
+  "output": "out/示例监测日报_已签章.pdf",
+  "dpi": 300,
+  "origin": "top-left",
+  "signatures": [
+    {
+      "name": "示例签名_甲_1_项目负责人",
+      "page": 1,
+      "rect": [
+        156.0,
+        600.5,
+        85.0,
+        29.0
+      ],
+      "image": "assets/seals/示例签名_甲.png",
+      "blend": "auto"
+    },
+    {
+      "name": "示例签名_乙_1_审核人",
+      "page": 1,
+      "rect": [
+        132.0,
+        634.5,
+        85.0,
+        29.0
+      ],
+      "image": "assets/seals/示例签名_乙.png",
+      "blend": "auto"
+    },
+    {
+      "name": "示例项目章_1",
+      "page": 1,
+      "rect": [
+        126.0,
+        652.5,
+        102.0,
+        105.0
+      ],
+      "image": "assets/seals/示例项目章.png",
+      "blend": "auto"
+    },
+    {
+      "name": "示例签名_甲_3_监测员",
+      "page": 3,
+      "rect": [
+        132.0,
+        600.5,
+        85.0,
+        29.0
+      ],
+      "image": "assets/seals/示例签名_甲.png",
+      "blend": "auto"
+    },
+    {
+      "name": "示例签名_乙_3_复核",
+      "page": 3,
+      "rect": [
+        120.0,
+        634.5,
+        85.0,
+        29.0
+      ],
+      "image": "assets/seals/示例签名_乙.png",
+      "blend": "auto"
+    },
+    {
+      "name": "示例签名_甲_3_技术负责人",
+      "page": 3,
+      "rect": [
+        156.0,
+        668.5,
+        85.0,
+        29.0
+      ],
+      "image": "assets/seals/示例签名_甲.png",
+      "blend": "auto"
+    },
+    {
+      "name": "示例项目章_3",
+      "page": 3,
+      "rect": [
+        126.0,
+        686.5,
+        102.0,
+        105.0
+      ],
+      "image": "assets/seals/示例项目章.png",
+      "blend": "auto"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+# 输出与临时文件
+out/
+*.pdf
+!examples/*.pdf
+.studio_tmp/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# 真实签章素材永远不要提交进来
+assets/seals/*.png
+!assets/seals/示例签名_甲.png
+!assets/seals/示例签名_乙.png
+!assets/seals/示例项目章.png
+
+# 证书与私钥
+cert/
+*.pfx
+*.p12
+*.key
+
+# 自己的作业配置（含真实工程/人名）
+jobs/*.json
+!jobs/README.md
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini
