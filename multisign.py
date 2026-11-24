@@ -34,7 +34,7 @@ multisign.py —— PDF 多处定位、每处内容可不同的批量数字签�
 
   # 5) 命令行直接签(单处)
   python multisign.py --input a.pdf --output b.pdf -p "cert/my.p12:密码" \
-      --at "1,320,760,160,50=监测负责人：示例甲" --at "1,320,690,160,50=审核：示例乙"
+      --at "1,320,760,160,50=监测负责人：张三" --at "1,320,690,160,50=审核：李四"
 """
 from __future__ import annotations
 
@@ -845,10 +845,10 @@ def write_template(path: str, input_pdf: str):
         "origin": "top-left",
         "font": "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
         "default_cert": {"pfx": "cert/my.p12", "password": "证书密码",
-                         "location": "示例市", "reason": "日报签发（示例）"},
+                         "location": "杭州", "reason": "基坑监测日报签发"},
         "signatures": [
             {"name": "jianceren", "page": 1, "rect": [330, 700, 170, 44],
-             "text": "监测负责人：示例甲\n{date}", "font_size": 10, "border": False},
+             "text": "监测负责人：张三\n{date}", "font_size": 10, "border": False},
             {"name": "shenheyuan", "page": 1, "rect": [330, 640, 170, 44],
              "text": "审  核：________\n{date}", "font_size": 10, "border": False},
             {"name": "xiangmujingli", "page": 2, "rect": [330, 700, 170, 44],

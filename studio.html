@@ -28,6 +28,24 @@
   #banner{display:none;background:#fef2f2;border-bottom:1px solid #fecaca;color:#991b1b;
           padding:9px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap}
   #banner b{font-weight:600}
+  /* ---- 版本 / 更新 ---- */
+  .verchip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:20px;
+           background:#f1f5f9;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .verchip.hasnew{background:#fff7ed;border-color:#fdba74;color:#c2410c;font-weight:600}
+  #updbar{display:none;background:#fffbeb;border-bottom:1px solid #fcd34d;color:#78350f;
+          padding:9px 16px;font-size:13px;line-height:1.6;align-items:center;gap:12px;flex-wrap:wrap}
+  #updbar.show{display:flex}
+  #updbar .u{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+  #updbar .u b{font-weight:600}
+  #updbar .u .meta{font-size:11.5px;color:#92400e;opacity:.85}
+  #updbar .u .notes{font-size:12px;color:#78350f;white-space:pre-wrap;margin-top:3px;max-height:76px;overflow:auto}
+  #updbar .u .manual{margin-top:6px;font-size:12px;color:#92400e;background:#fff7ed;border:1px solid #fdba74;
+                     border-radius:6px;padding:6px 9px;line-height:1.7}
+  #updbar .u .manual b{color:#b45309;font-weight:600}
+  #updbar .prog{height:6px;background:#fde68a;border-radius:4px;overflow:hidden;width:170px;display:none}
+  #updbar .prog i{display:block;height:100%;width:0;background:#f59e0b;transition:width .25s}
+  #updbar.busy .prog{display:block}
+  #updbar.done{background:#ecfdf5;border-color:#6ee7b7;color:#065f46}
   #status{max-width:430px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .toolbar .hint{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:420px}
   .ph span{flex:0 0 auto;padding-left:8px}
@@ -43,25 +61,38 @@
   .sig img{width:52px;height:34px;object-fit:contain;background:
       repeating-conic-gradient(#eef1f5 0% 25%,#fff 0% 50%) 50%/10px 10px;border-radius:4px}
   .sig .nm{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  .sig .stag{flex:0 0 auto;font-size:10px;color:#0369a1;background:#e0f2fe;border-radius:20px;padding:1px 5px}
   .sig .del{color:#c0c7d2;font-size:15px;padding:0 3px}
   .sig .del:hover{color:var(--red)}
+  .doclist{max-height:32vh;overflow:auto;padding:8px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .doc{padding:7px 8px;border:1.5px solid transparent;border-radius:8px;cursor:pointer;font-size:12px}
+  .doc:hover{background:#f8fafc}
+  .doc.active{border-color:var(--blue);background:var(--blue-l)}
+  .doc .t{display:flex;align-items:center;gap:6px}
+  .doc .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .doc .meta{color:var(--muted);font-size:11px;margin-top:2px}
+  .doc .badge{flex:0 0 auto;font-size:10px;padding:1px 5px;border-radius:20px;background:var(--blue);color:#fff}
+  .doc .badge.follow{background:#e2e8f0;color:#64748b}
+  .doc .op{color:#94a3b8;font-size:11px;padding:0 2px}
+  .doc .op:hover{color:var(--red)}
   .sizer{padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
   .sizer input{width:64px;height:26px;border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:12px}
   /* 中间画布 */
-  .center{display:flex;flex-direction:column;min-width:0;background:#e9edf2}
+  .center{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#e9edf2}
   .toolbar{height:42px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--panel);
            border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
   .toolbar .btn{height:28px;padding:0 9px;font-size:12.5px}
   .toolbar input[type=number]{width:52px;height:26px;border:1px solid var(--line);border-radius:5px;
        text-align:center;font-size:12.5px}
-  .stage{flex:1;overflow:auto;padding:18px;display:flex;justify-content:center;align-items:flex-start}
+  .stage{flex:1;min-height:0;overflow:auto;padding:18px;display:flex;justify-content:center;align-items:flex-start}
   .pagewrap{position:relative;background:#fff;box-shadow:var(--shadow);border-radius:2px;
             max-width:100%;cursor:crosshair;user-select:none;flex:0 0 auto}
   .pagewrap img.page{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none}
   .placeholder{color:#8a93a3;text-align:center;margin:auto;font-size:13px;line-height:2}
   .placeholder b{display:block;font-size:15px;color:#5b6472;margin-bottom:4px}
   /* 贴章项 */
-  .item{position:absolute;border:1.5px dashed #94a3b8;cursor:move;box-sizing:content-box}
+  .item{position:absolute;border:1.5px dashed #94a3b8;cursor:move;box-sizing:content-box;
+        transform-origin:center center}
   .item img{width:100%;height:100%;display:block;pointer-events:none}
   .item.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.18)}
   .item .handle{position:absolute;right:-6px;bottom:-6px;width:12px;height:12px;background:var(--blue);
@@ -87,6 +118,14 @@
        padding:0 5px;font-size:12px;text-align:right}
   .props .prow em{font-style:normal;font-size:11px;color:#9aa3b0;margin-right:4px}
   .props .chk{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer}
+  .props .mini{height:24px;padding:0 7px;font-size:11.5px;border:1px solid var(--line);border-radius:5px;
+       background:#fff;color:#475569;cursor:pointer}
+  .props .mini:hover{border-color:var(--blue);color:var(--blue)}
+  .sizer .chk{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:#64748b;cursor:pointer;
+       white-space:nowrap}
+  .sizer .chk input[type=checkbox]{width:auto;height:auto;margin:0}
+  .sizer .chk input[type=number]{width:52px}
+  .sizer .chk input:disabled{opacity:.5}
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;
          background:#111827;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;
          transition:.25s;pointer-events:none;z-index:99;max-width:80%}
@@ -103,22 +142,30 @@
 </head>
 <body>
 <div id="banner" style="display:none"></div>
+<div id="updbar"></div>
 <header>
   <h1>Sign<span>Studio</span> · PDF 电子签章</h1>
-  <button class="btn" id="btnPdf">＋ 打开 PDF</button>
+  <button class="btn" id="btnPdf" title="可一次选择多个 PDF：在第一个文件上盖章，其余文件按同一套位置批量盖章">＋ 打开 PDF（可多选）</button>
   <button class="btn" id="btnSig">＋ 导入签名 PNG</button>
   <div style="width:1px;height:22px;background:var(--line)"></div>
   <select class="btn" id="projSel" style="min-width:132px" title="已保存的工程"><option value="">工程…</option></select>
   <button class="btn" id="btnLoadProj">载入工程</button>
+  <button class="btn" id="btnImportProj" title="导入零安装版（网页版）保存的工程 JSON">导入工程</button>
   <button class="btn" id="btnSaveProj" disabled>保存为工程</button>
   <div class="spacer"></div>
   <span class="hint" id="status">先打开一份 PDF，再导入签名图片</span>
   <div class="spacer"></div>
+  <span class="verchip" id="lanChip" title="局域网共享地址（点击复制）">仅本机</span>
+  <span class="verchip" id="verChip" title="当前版本（点击检查更新）">v…</span>
   <button class="btn primary" id="btnExport" disabled>⤓ 一键导出 PDF</button>
 </header>
 
 <main>
   <aside class="left">
+    <div class="ph">PDF 文件 <span class="hint" id="docCount">0</span></div>
+    <div class="doclist" id="docList">
+      <div class="empty">还没有打开 PDF<br>点顶部「打开 PDF」可一次选多个</div>
+    </div>
     <div class="ph">签名库 <span class="hint" id="sigCount">0</span></div>
     <div class="list" id="sigList">
       <div class="empty">还没有签名<br>点顶部「导入签名 PNG」</div>
@@ -126,6 +173,11 @@
     <div class="sizer">
       默认宽度 <input id="defW" type="number" min="5" max="200" step="1" value="30"> mm
       <div style="margin-top:6px;color:#9aa3b0;font-size:11px">放置时按此宽度，高度自动等比</div>
+      <label class="chk" title="勾选后，新放置的签名会自动带一个随机倾斜角（选中后可在右侧单独调整）">
+        <input type="checkbox" id="randRot"> 随机倾斜
+        <span style="color:#9aa3b0">±</span>
+        <input id="randRotMax" type="number" min="0.2" max="30" step="0.1" value="2.5" disabled> °
+      </label>
     </div>
   </aside>
 
@@ -138,7 +190,8 @@
       <button class="btn" id="zoomOut">－</button>
       <span id="zoomVal">100%</span>
       <button class="btn" id="zoomIn">＋</button>
-      <button class="btn" id="zoomFit">适应宽度</button>
+      <button class="btn" id="zoomFit" title="页面宽度撑满窗口">适应宽度</button>
+      <button class="btn" id="zoomPage" title="整页完整显示（打开文件时的默认）">适应页面</button>
       <div class="spacer"></div>
       <span class="hint">选中签名后，在页面上拖一个框即可盖章；单击则按默认尺寸放置</span>
     </div>
@@ -165,6 +218,9 @@
         <span>高</span><input id="pH" type="number" step="0.5" min="1"><em>mm</em></div>
       <div class="prow"><span>X</span><input id="pX" type="number" step="0.5"><em>mm</em>
         <span>Y</span><input id="pY" type="number" step="0.5"><em>mm</em></div>
+      <div class="prow"><span>倾斜</span><input id="pRot" type="number" step="0.1" min="-45" max="45"><em>°</em>
+        <button class="mini" id="pRotDice" title="为这一处随机一个倾斜角">随机</button>
+        <button class="mini" id="pRotZero" title="恢复水平">归零</button></div>
       <label class="chk" title="勾选时：改宽高任一边，另一边自动按原图比例跟随；取消勾选可自由拉伸"><input type="checkbox" id="pRatio" checked> 按原比例（改一边另一边自动跟随）</label>
     </div>
   </aside>
@@ -180,9 +236,11 @@
   </div>
 </div>
 
-<input type="file" id="filePdf" accept="application/pdf,.pdf"
+<input type="file" id="filePdf" accept="application/pdf,.pdf" multiple
        style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0">
 <input type="file" id="fileSig" accept="image/png,image/*" multiple
+       style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0">
+<input type="file" id="fileProj" accept=".json,application/json"
        style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0">
 
 <script>
@@ -191,13 +249,17 @@ const RENDER_DPI = 110;        // 后端渲染页面的 dpi
 const $ = s => document.querySelector(s);
 
 const state = {
+  docs: [],          // [{docId,name,pages,npages}] 批量导入的 PDF，第一份为基准文件
+  docIdx: 0,         // 当前预览的是哪一份
+  masterIdx: 0,      // 坐标基准（用户在上面盖章的那一份）
   docId: null, pages: [], npages: 0,
-  page: 1, zoom: 1.0,
+  page: 1, zoom: 1.0, fitMode: 'page',   // fitMode: page | width | manual
   sigs: [],          // {id,name,w,h,url}
   activeSig: null,   // sig id
   items: [],         // {uid,page,x,y,w,h,sigId}  坐标单位 pt，左上角原点
   activeItem: null,
   defaultMm: 30,
+  randRot: false, randRotMax: 2.5,   // 新放置的章是否随机倾斜 / 最大角度(°)
   pageNatural: {w: 0, h: 0},   // 当前页渲染像素尺寸
   keepRatio: true,
 };
@@ -217,7 +279,19 @@ async function checkHealth(){
     if(!j.ok){
       banner('<b>依赖未安装完整，导入 PDF 会失败：</b>\n' + j.missing.join('\n') +
              '\n请在程序目录执行 <b>' + j.install_cmd + '</b>（或 ' + j.executable + ' -m pip install -r requirements.txt）后重启本工具。');
-    }else{ hideBanner(); }
+    }else{
+      hideBanner();
+      const chip = $('#lanChip');
+      if(chip && j.lan && j.lan.length){
+        const u = j.lan[0];
+        chip.textContent = '共享 ' + u.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        chip.title = '局域网访问地址（点击复制）：' + j.lan.join('  ');
+        chip.onclick = async () => {
+          try{ await navigator.clipboard.writeText(j.lan[0]); toast('已复制：' + j.lan[0]); }
+          catch(err){ toast(j.lan[0]); }
+        };
+      }
+    }
   }catch(e){
     banner('<b>连不上本地服务</b>：' + e.message + '\n请确认命令行窗口没有关闭，或重新运行启动脚本。');
   }
@@ -235,44 +309,177 @@ function uid(){ return Math.random().toString(36).slice(2,10); }
 function fmt(n){ return Math.round(n*10)/10; }
 function mmToPt(mm){ return mm * PT; }
 
-/* ---------- 打开 PDF ---------- */
-$('#btnPdf').onclick = () => $('#filePdf').click();
-$('#filePdf').onchange = async e => {
-  const f = e.target.files[0]; if(!f) return;
-  if(!/\.pdf$/i.test(f.name)){ toast('请选择 PDF 文件', true); return; }
-  if(location.protocol === 'file:'){ checkHealth(); toast('请用启动脚本运行后再导入', true); return; }
-  $('#status').textContent = '正在读取 ' + f.name + ' …';
-  const data = await fileToB64(f);
+/* ---------- 倾斜角：随机 / 归一化 ----------
+ * rot 单位度，逆时针为正（和 PDF 一致）；CSS 预览用 -rot。
+ * 随机值避开 0 附近，否则看起来和没倾斜一样。
+ */
+function normRot(v){
+  let r = parseFloat(v); if(isNaN(r)) r = 0;
+  r = ((r + 180) % 360 + 360) % 360 - 180;
+  return Math.round(r * 10) / 10;
+}
+function randAngle(){
+  const m = Math.max(0, Math.min(45, parseFloat(state.randRotMax) || 0));
+  if(m <= 0) return 0;
+  const lo = Math.min(m, Math.max(0.2, m * 0.35));
+  const a = lo + Math.random() * (m - lo);
+  return Math.round((Math.random() < 0.5 ? -a : a) * 10) / 10;
+}
+(function initRotUI(){
+  const on = $('#randRot'), mx = $('#randRotMax');
+  if(!on || !mx) return;
   try{
-    const r = await fetch('/api/open_pdf', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({filename:f.name, data})});
-    const j = await r.json();
-    if(!r.ok) throw new Error(j.error || '打开失败');
-    state.docId = j.doc_id; state.pages = j.pages; state.npages = j.npages; state.page = 1;
-    state.docName = f.name;
-    state.items = []; state.activeItem = null;
-    $('#pageTotal').textContent = j.npages;
-    $('#pageNo').max = j.npages; $('#pageNo').value = 1;
-    $('#placeholder').style.display = 'none';
-    $('#pagewrap').style.display = 'block';
-    $('#status').textContent = f.name + ' · ' + j.npages + ' 页';
-    $('#btnExport').disabled = false;
-    $('#btnSaveProj').disabled = false;
-    await loadPage(1);
-    state.zoom = 1.0; fitWidth();
-    renderItemList();
-  }catch(err){
-    const msg = String(err && err.message || err);
-    toast('打开 PDF 失败：' + msg, true);
-    $('#status').textContent = '打开失败';
-    if(/Failed to fetch|NetworkError|Load failed/i.test(msg)){
-      banner('<b>无法连接本地服务</b>：' + msg + '\n请确认命令行窗口仍在运行，并刷新本页面。');
-    }else if(/No module named|依赖/i.test(msg)){
-      banner('<b>缺少依赖：</b>' + msg + '\n请在程序目录执行 install.bat（Linux: bash install.sh）后重启工具。');
+    const saved = JSON.parse(localStorage.getItem('signstudio_randrot_v1') || 'null');
+    if(saved){
+      on.checked = !!saved.on;
+      state.randRotMax = Math.max(0.2, Math.min(30, parseFloat(saved.max) || 2.5));
+      mx.value = state.randRotMax;
+    }
+  }catch(e){}
+  state.randRot = on.checked;
+  mx.disabled = !on.checked;
+  const save = () => {
+    try{ localStorage.setItem('signstudio_randrot_v1',
+      JSON.stringify({on: state.randRot, max: state.randRotMax})); }catch(e){}
+  };
+  on.onchange = () => { state.randRot = on.checked; mx.disabled = !on.checked; save(); };
+  mx.oninput = mx.onchange = () => {
+    state.randRotMax = Math.max(0.2, Math.min(30, parseFloat(mx.value) || 2.5));
+    save();
+  };
+})();
+
+/* ---------- 打开 PDF（支持一次多选，批量盖章） ---------- */
+$('#btnPdf').onclick = () => $('#filePdf').click();
+function resetUndo(){ try{ undoStack.length = 0; }catch(e){} }
+$('#filePdf').onchange = async e => {
+  const files = [...e.target.files].filter(f => /\.pdf$/i.test(f.name));
+  e.target.value = '';
+  if(!files.length){ toast('请选择 PDF 文件', true); return; }
+  if(location.protocol === 'file:'){ checkHealth(); toast('请用启动脚本运行后再导入', true); return; }
+
+  const firstTime = state.docs.length === 0;
+  let added = 0;
+  for(let k = 0; k < files.length; k++){
+    const f = files[k];
+    $('#status').textContent = `正在读取 ${k+1}/${files.length}：${f.name} …`;
+    try{
+      const data = await fileToB64(f);
+      const r = await fetch('/api/open_pdf', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({filename:f.name, data})});
+      const j = await r.json();
+      if(!r.ok) throw new Error(j.error || '打开失败');
+      if(!state.docs.some(d => d.docId === j.doc_id))
+        state.docs.push({docId:j.doc_id, name:f.name, pages:j.pages, npages:j.npages});
+      added++;
+    }catch(err){
+      const msg = String(err && err.message || err);
+      toast(f.name + ' 打开失败：' + msg, true);
+      if(/Failed to fetch|NetworkError|Load failed/i.test(msg)){
+        banner('<b>无法连接本地服务</b>：' + msg + '\n请确认命令行窗口仍在运行，并刷新本页面。');
+      }else if(/No module named|依赖/i.test(msg)){
+        banner('<b>缺少依赖：</b>' + msg + '\n请在程序目录执行 install.bat（Linux: bash install.sh）后重启工具。');
+      }
     }
   }
-  e.target.value = '';
+  if(!added){ $('#status').textContent = '打开失败'; return; }
+
+  // 第一批导入：第一份自动成为基准文件，并清空旧章位
+  if(firstTime){ state.masterIdx = 0; state.items = []; state.activeItem = null; }
+  if(state.docs.length === added) resetUndo();
+  if(state.masterIdx >= state.docs.length) state.masterIdx = 0;
+  const target = firstTime ? 0 : state.docs.length - added;
+  await switchDoc(target);
+  renderDocs();
+  if(state.docs.length > 1){
+    toast(`已导入 ${state.docs.length} 份 PDF。在「主」文件上盖章，导出时其余文件按同一位置批量盖章`);
+  }
+  renderItemList();
 };
+
+/* 把某一份 PDF 设为当前预览 */
+async function switchDoc(idx){
+  if(idx < 0 || idx >= state.docs.length) return;
+  const d = state.docs[idx];
+  state.docIdx = idx;
+  state.docId = d.docId; state.pages = d.pages; state.npages = d.npages;
+  state.docName = d.name; state.page = 1;
+  state.activeItem = null;
+  $('#pageTotal').textContent = d.npages;
+  $('#pageNo').max = d.npages; $('#pageNo').value = 1;
+  $('#placeholder').style.display = 'none';
+  $('#pagewrap').style.display = 'block';
+  $('#btnExport').disabled = false;
+  syncButtons();
+  $('#status').textContent = d.name + ' · ' + d.npages + ' 页' +
+    (idx === state.masterIdx ? ' · 基准文件（可盖章）' : ' · 跟随文件（只读预览，按基准位置等比映射）');
+  $('#pagewrap').style.cursor = (idx === state.masterIdx) ? 'crosshair' : 'default';
+  await loadPage(1);
+  state.fitMode = 'page'; fitPage();
+  renderDocs(); renderItems(); renderItemList();
+}
+
+/* 设为主文件：把已有章位按页尺寸比例换算到新基准 */
+async function setMaster(idx){
+  if(idx < 0 || idx >= state.docs.length || idx === state.masterIdx) return;
+  const oldD = state.docs[state.masterIdx], nuD = state.docs[idx];
+  state.items.forEach(it => {
+    const op = oldD.pages[it.page-1], np = nuD.pages[it.page-1];
+    if(!op || !np || !op.w_pt || !op.h_pt) return;
+    const sx = np.w_pt / op.w_pt, sy = np.h_pt / op.h_pt;
+    it.x *= sx; it.y *= sy; it.w *= sx; it.h *= sy;
+  });
+  state.masterIdx = idx;
+  snapUndo();
+  await switchDoc(idx);
+  toast('已把「' + nuD.name + '」设为基准文件');
+}
+
+function removeDoc(idx){
+  if(idx < 0 || idx >= state.docs.length) return;
+  const wasMaster = idx === state.masterIdx;
+  state.docs.splice(idx, 1);
+  if(!state.docs.length){
+    state.docIdx = state.masterIdx = 0; state.docId = null; state.pages = []; state.npages = 0;
+    state.items = []; state.activeItem = null; state.docName = '';
+    $('#pagewrap').style.display = 'none'; $('#placeholder').style.display = 'block';
+    syncButtons();
+    $('#pageTotal').textContent = '0'; $('#status').textContent = '先打开一份 PDF，再导入签名图片';
+    renderDocs(); renderItems(); renderItemList(); return;
+  }
+  if(idx < state.masterIdx) state.masterIdx--;
+  else if(wasMaster) state.masterIdx = 0;      // 删掉基准文件时退到第一份，章位坐标不再换算
+  if(state.docIdx >= state.docs.length) state.docIdx = state.docs.length - 1;
+  switchDoc(state.docIdx);
+}
+
+function renderDocs(){
+  const box = $('#docList');
+  $('#docCount').textContent = state.docs.length;
+  $('#btnExport').textContent = state.docs.length > 1
+      ? `⤓ 批量导出（${state.docs.length} 份）` : '⤓ 一键导出 PDF';
+  if(!state.docs.length){
+    box.innerHTML = '<div class="empty">还没有打开 PDF<br>点顶部「打开 PDF」可一次选多个</div>';
+    return;
+  }
+  box.innerHTML = '';
+  state.docs.forEach((d, i) => {
+    const isM = i === state.masterIdx;
+    const el = document.createElement('div');
+    el.className = 'doc' + (i === state.docIdx ? ' active' : '');
+    el.innerHTML = `<div class="t"><span class="badge${isM ? '' : ' follow'}">${isM ? '主' : '跟随'}</span>
+        <span class="nm" title="${d.name}">${d.name}</span>
+        ${isM ? '' : '<span class="op setm" title="设为基准文件">设为主</span>'}
+        <span class="op del" title="移除">✕</span></div>
+      <div class="meta">${d.npages} 页 · ${fmt(d.pages[0] ? d.pages[0].w_pt : 0)}×${fmt(d.pages[0] ? d.pages[0].h_pt : 0)} pt</div>`;
+    el.onclick = ev => {
+      if(ev.target.classList.contains('del')){ ev.stopPropagation(); removeDoc(i); return; }
+      if(ev.target.classList.contains('setm')){ ev.stopPropagation(); setMaster(i); return; }
+      switchDoc(i);
+    };
+    box.appendChild(el);
+  });
+}
 
 /* ---------- 渲染页面 ---------- */
 async function loadPage(p){
@@ -285,33 +492,59 @@ async function loadPage(p){
     img.src = `/api/page/${state.docId}/${state.page}?dpi=${RENDER_DPI}&t=${Date.now()}`;
   });
   state.pageNatural = {w: img.naturalWidth, h: img.naturalHeight};
-  applyZoom();
+  if(state.fitMode === 'manual') applyZoom(); else refit();
   renderItems();
 }
 function pageSizePt(){
   const pg = state.pages[state.page-1];
   return pg ? {w: pg.w_pt, h: pg.h_pt} : {w: 0, h: 0};
 }
+function availBox(){
+  const st = $('#stage');
+  // .stage padding:18px 两侧各一,再留 8px 余量给滚动条/阴影
+  return {w: Math.max(80, st.clientWidth - 44), h: Math.max(80, st.clientHeight - 44)};
+}
 function applyZoom(){
   const img = $('#pageImg');
-  const wrapW = $('#stage').clientWidth - 40;
-  const naturalCssW = state.pageNatural.w / (RENDER_DPI/72) * (72/72); // px @ dpi -> css px
   const base = state.pageNatural.w; // 用像素宽度做基准
   const w = Math.round(base * state.zoom);
   img.style.width = w + 'px';
   $('#pagewrap').style.width = w + 'px';
-  $('#pagewrap').style.height = Math.round(w * state.pageNatural.h / (state.pageNatural.w||1)) + 'px';
+  const h = Math.round(w * state.pageNatural.h / (state.pageNatural.w||1));
+  $('#pagewrap').style.height = h + 'px';
   $('#zoomVal').textContent = Math.round(state.zoom*100) + '%';
+  // 整页放得下时上下居中，放不下时保持顶部对齐（否则溢出部分滚不到）
+  const box = availBox();
+  $('#stage').style.alignItems = (h <= box.h) ? 'center' : 'flex-start';
   renderItems();
 }
-$('#zoomIn').onclick = ()=>{ state.zoom = Math.min(3, state.zoom*1.15); applyZoom(); };
-$('#zoomOut').onclick = ()=>{ state.zoom = Math.max(0.25, state.zoom/1.15); applyZoom(); };
+$('#zoomIn').onclick = ()=>{ state.fitMode='manual'; state.zoom = Math.min(3, state.zoom*1.15); applyZoom(); };
+$('#zoomOut').onclick = ()=>{ state.fitMode='manual'; state.zoom = Math.max(0.25, state.zoom/1.15); applyZoom(); };
 $('#zoomFit').onclick = ()=>{ fitWidth(); };
+$('#zoomPage').onclick = ()=>{ fitPage(); };
+/* 适应宽度：宽度撑满，页面可能比窗口高（需要上下滚动） */
 function fitWidth(){
   if(!state.pageNatural.w) return;
-  const avail = $('#stage').clientWidth - 44;
+  state.fitMode = 'width';
+  const avail = availBox().w;
   state.zoom = Math.max(0.2, Math.min(3, avail / state.pageNatural.w));
   applyZoom();
+}
+/* 适应页面：整页完整显示在窗口内，A4 打开即可看全（默认） */
+function fitPage(){
+  if(!state.pageNatural.w) return;
+  state.fitMode = 'page';
+  const box = availBox();
+  const zW = box.w / state.pageNatural.w;
+  const zH = box.h / state.pageNatural.h;
+  state.zoom = Math.max(0.2, Math.min(3, Math.min(zW, zH)));
+  applyZoom();
+}
+/* 按当前模式重新适配（窗口尺寸变化 / 翻页后页面尺寸不同时用） */
+function refit(){
+  if(!state.pageNatural.w) return;
+  if(state.fitMode === 'manual') return;
+  if(state.fitMode === 'width') fitWidth(); else fitPage();
 }
 $('#prevPage').onclick = ()=> loadPage(state.page-1);
 $('#nextPage').onclick = ()=> loadPage(state.page+1);
@@ -332,12 +565,13 @@ $('#fileSig').onchange = async e => {
         body: JSON.stringify({filename:f.name, data})});
       const j = await r.json();
       if(!r.ok) throw new Error(j.error || '导入失败');
-      state.sigs.push({id:j.sig_id, name:j.name, w:j.w, h:j.h, url:`/api/sig/${j.sig_id}`});
+      state.sigs.push({id:j.sig_id, name:j.name, w:j.w, h:j.h,
+                       url:`/api/sig/${j.sig_id}`, shared:!!j.shared});
       state.activeSig = j.sig_id;
     }catch(err){ toast(f.name + ': ' + err.message, true); }
   }
   renderSigs();
-  toast('已导入 ' + files.length + ' 张签名');
+  toast('已导入 ' + files.length + ' 张签名（已存入本机共享库，其他电脑也能看到）');
   e.target.value = '';
 };
 function renderSigs(){
@@ -349,7 +583,8 @@ function renderSigs(){
     const d = document.createElement('div');
     d.className = 'sig' + (s.id === state.activeSig ? ' active' : '');
     d.innerHTML = `<img src="${s.url}" alt=""><div class="nm" title="${s.name}">${s.name}</div>
-                   <div class="del" title="移除">✕</div>`;
+                   ${s.shared ? '<span class="stag" title="共享签名（存在主机 shared/seals，所有电脑可见）">共享</span>' : ''}
+                   <div class="del" title="${s.shared ? '从本机列表移除（不影响共享库）' : '移除'}">✕</div>`;
     d.onclick = ev => {
       if(ev.target.classList.contains('del')){
         state.sigs = state.sigs.filter(x => x.id !== s.id);
@@ -364,6 +599,32 @@ function renderSigs(){
 }
 $('#defW').onchange = e => { state.defaultMm = Math.max(5, Math.min(200, parseFloat(e.target.value)||30)); };
 
+/* ---------- 共享签名库：主机上已有的签名，任何电脑打开都能直接用 ---------- */
+async function loadSharedSeals(silent){
+  try{
+    const r = await fetch('/api/lib/seals');
+    const j = await r.json();
+    const list = j.seals || [];
+    const ids = new Set(list.map(s => s.sig_id));
+    // 共享库里已删除的，本地也去掉；本机临时导入的保留
+    const before = state.sigs.length;
+    state.sigs = state.sigs.filter(s => !s.shared || ids.has(s.id));
+    let added = 0;
+    list.forEach(s => {
+      if(!state.sigs.some(x => x.id === s.sig_id)){
+        state.sigs.push({id:s.sig_id, name:s.name, w:s.w, h:s.h,
+                         url:`/api/sig/${s.sig_id}`, shared:true});
+        added++;
+      }
+    });
+    if(added || state.sigs.length !== before) renderSigs();
+    if(!state.activeSig && state.sigs.length) state.activeSig = state.sigs[0].id;
+    if(!silent) toast(added ? `已从共享库载入 ${added} 张签名` : `共享库 ${list.length} 张签名，已是最新`);
+    return list;
+  }catch(e){ if(!silent) toast('读取共享签名库失败：' + e.message, true); return []; }
+}
+loadSharedSeals(true);
+
 /* ---------- 放置 / 拖动 / 缩放 ---------- */
 const wrap = $('#pagewrap');
 let drag = null;   // {mode:'new'|'move'|'resize', ...}
@@ -371,14 +632,22 @@ let drag = null;   // {mode:'new'|'move'|'resize', ...}
 wrap.addEventListener('mousedown', e => {
   if(!state.docId) return;
   if(e.button !== 0) return;
+  if(state.docIdx !== state.masterIdx){
+    toast('当前是跟随文件（只读预览）。请切回标「主」的文件盖章');
+    return;
+  }
   const target = e.target.closest('.item');
   const rect = wrap.getBoundingClientRect();
 
   if(target){
     const uidv = target.dataset.uid;
+    // 点右上角的小叉：立刻删除并返回。不能先 renderItems()，那会把正在点的节点换掉，
+    // 浏览器随后不会再把 click 派发到新节点上，表现就是"叉叉点了没反应"。
+    if(e.target.classList.contains('x')){ e.preventDefault(); removeItem(uidv); return; }
     const it = state.items.find(x => x.uid === uidv);
     if(!it) return;
     state.activeItem = uidv; renderItems(); renderItemList();
+    snapUndo();   // 拖动/缩放前留快照，Ctrl+Z 可回到动手之前
     const isHandle = e.target.classList.contains('handle');
     drag = {mode: isHandle ? 'resize' : 'move', it, startX: e.clientX, startY: e.clientY,
             ox: it.x, oy: it.y, ow: it.w, oh: it.h, rect};
@@ -439,12 +708,23 @@ window.addEventListener('mouseup', e => {
     const pg = pageSizePt();
     x = Math.max(0, Math.min(pg.w - w, x));
     y = Math.max(0, Math.min(pg.h - h, y));
-    const item = {uid: uid(), page: state.page, x, y, w, h, sigId: state.activeSig};
+    const item = {uid: uid(), page: state.page, x, y, w, h, sigId: state.activeSig,
+                  rot: state.randRot ? randAngle() : 0};
+    snapUndo();
     state.items.push(item); state.activeItem = item.uid;
     renderItems(); renderItemList();
   }
   drag = null;
 });
+
+/* 章位坐标以「主文件」为基准；预览其他文件时按页尺寸等比映射（只读） */
+function scaleFor(page){
+  const m = state.docs[state.masterIdx], v = state.docs[state.docIdx];
+  if(!m || !v || m.docId === v.docId) return {sx:1, sy:1};
+  const mp = m.pages[page-1], vp = v.pages[page-1];
+  if(!mp || !vp || !mp.w_pt || !mp.h_pt) return {sx:1, sy:1};
+  return {sx: vp.w_pt / mp.w_pt, sy: vp.h_pt / mp.h_pt};
+}
 
 function renderItems(){
   const box = $('#items');
@@ -452,13 +732,15 @@ function renderItems(){
   state.items.filter(it => it.page === state.page).forEach(it => {
     const sig = state.sigs.find(s => s.id === it.sigId);
     if(!sig) return;
+    const sc = scaleFor(it.page);
     const d = document.createElement('div');
     d.className = 'item' + (it.uid === state.activeItem ? ' active' : '');
     d.dataset.uid = it.uid;
-    d.style.left = ptToPx(it.x) + 'px';
-    d.style.top = ptToPx(it.y) + 'px';
-    d.style.width = ptToPx(it.w) + 'px';
-    d.style.height = ptToPx(it.h) + 'px';
+    d.style.left = ptToPx(it.x * sc.sx) + 'px';
+    d.style.top = ptToPx(it.y * sc.sy) + 'px';
+    d.style.width = ptToPx(it.w * sc.sx) + 'px';
+    d.style.height = ptToPx(it.h * sc.sy) + 'px';
+    if(it.rot) d.style.transform = `rotate(${-it.rot}deg)`;   // CSS 顺时针为正 → 取负
     d.innerHTML = `<img src="${sig.url}" alt=""><div class="handle"></div><div class="x" title="删除">✕</div>`;
     d.querySelector('.x').onclick = ev => { ev.stopPropagation(); removeItem(it.uid); };
     box.appendChild(d);
@@ -473,21 +755,24 @@ function syncProps(){
   const box = $('#props');
   if(!box) return;
   const it = state.items.find(x => x.uid === state.activeItem);
-  if(!it){ box.style.display = 'none'; return; }
+  if(!it || state.docIdx !== state.masterIdx){ box.style.display = 'none'; return; }
   box.style.display = 'block';
   if(document.activeElement !== $('#pW')) $('#pW').value = fmt(ptToMm(it.w));
   if(document.activeElement !== $('#pH')) $('#pH').value = fmt(ptToMm(it.h));
   if(document.activeElement !== $('#pX')) $('#pX').value = fmt(ptToMm(it.x));
   if(document.activeElement !== $('#pY')) $('#pY').value = fmt(ptToMm(it.y));
+  if(document.activeElement !== $('#pRot')) $('#pRot').value = fmt(it.rot || 0);
 }
 
 /**
  * kind='w' 正在改宽 → 高自动按原图比例跟随
  * kind='h' 正在改高 → 宽自动按原图比例跟随
  * kind='xy' 只改位置
+ * kind='rot' 只改倾斜角（度，逆时针为正）
  * 勾选「按原比例」时始终等比；取消勾选可自由拉伸（改哪边动哪边）。
  */
 function applyProps(kind){
+  if(state.docIdx !== state.masterIdx) return;
   const it = state.items.find(x => x.uid === state.activeItem);
   if(!it) return;
   const sig = state.sigs.find(s => s.id === it.sigId);
@@ -509,6 +794,8 @@ function applyProps(kind){
     const ymm = parseFloat($('#pY').value);
     if(!isNaN(xmm)) it.x = mmToPt2(xmm);
     if(!isNaN(ymm)) it.y = mmToPt2(ymm);
+  } else if(kind === 'rot'){
+    it.rot = normRot($('#pRot').value);
   }
   const pg = pageSizePt();
   it.x = Math.max(0, Math.min(Math.max(0, pg.w - it.w), it.x));
@@ -520,17 +807,29 @@ $('#pW').addEventListener('input', () => applyProps('w'));
 $('#pH').addEventListener('input', () => applyProps('h'));
 $('#pX').addEventListener('input', () => applyProps('xy'));
 $('#pY').addEventListener('input', () => applyProps('xy'));
+$('#pRot').addEventListener('input', () => applyProps('rot'));
+$('#pRotDice').onclick = () => { $('#pRot').value = randAngle(); applyProps('rot'); };
+$('#pRotZero').onclick = () => { $('#pRot').value = 0; applyProps('rot'); };
 const ratioEl = $('#pRatio');
 if(ratioEl) ratioEl.addEventListener('change', () => { if(ratioEl.checked) applyProps(); });
 
 function removeItem(uidv){
+  // 章位是全局共用的，任何预览状态下都应该能删（只读限制只针对移动/改尺寸）
+  snapUndo();
   state.items = state.items.filter(x => x.uid !== uidv);
   if(state.activeItem === uidv) state.activeItem = null;
   renderItems(); renderItemList();
 }
 
+function syncButtons(){
+  const hasDoc = !!state.docId;
+  $('#btnExport').disabled = !hasDoc;
+  $('#btnSaveProj').disabled = !hasDoc || !state.items.length;
+}
+
 function renderItemList(){
   syncProps();
+  syncButtons();
   $('#itemCount').textContent = state.items.length;
   const box = $('#itemList');
   if(!state.items.length){
@@ -545,7 +844,7 @@ function renderItemList(){
     d.innerHTML = `<div class="t"><b>第 ${it.page} 页 · ${sig ? sig.name : '?'}</b>
         <span class="del" title="删除">✕</span></div>
       <div class="meta">位置 ${fmt(it.x)}, ${fmt(it.y)} pt · 尺寸 ${fmt(it.w)}×${fmt(it.h)} pt
-        (${fmt(it.w/PT)}×${fmt(it.h/PT)} mm)</div>`;
+        (${fmt(it.w/PT)}×${fmt(it.h/PT)} mm)${it.rot ? ' · 倾斜 ' + fmt(it.rot) + '°' : ''}</div>`;
     d.onclick = ev => {
       if(ev.target.classList.contains('del')){ removeItem(it.uid); return; }
       state.activeItem = it.uid;
@@ -555,34 +854,102 @@ function renderItemList(){
   });
 }
 
+/* ---------- 撤销 / 键盘微调 ---------- */
+const undoStack = [];
+function snapUndo(){
+  undoStack.push(JSON.stringify(state.items));
+  if(undoStack.length > 50) undoStack.shift();
+}
+function undoLast(){
+  if(!undoStack.length){ toast('没有可撤销的操作'); return; }
+  state.items = JSON.parse(undoStack.pop());
+  state.activeItem = null;
+  renderItems(); renderItemList();
+}
+let propsSnapDone = false;
+
 document.addEventListener('keydown', e => {
-  if((e.key === 'Delete' || e.key === 'Backspace') && state.activeItem && !/input|textarea/i.test(e.target.tagName)){
-    e.preventDefault(); removeItem(state.activeItem);
+  const typing = /input|textarea|select/i.test(e.target.tagName);
+  if(typing) return;
+  if((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')){
+    e.preventDefault(); undoLast(); return;
   }
-  if(e.key === 'Escape'){ state.activeItem = null; renderItems(); renderItemList(); }
+  if((e.key === 'Delete' || e.key === 'Backspace') && state.activeItem){
+    e.preventDefault(); removeItem(state.activeItem); return;
+  }
+  if(e.key === 'Escape'){ state.activeItem = null; renderItems(); renderItemList(); return; }
+  // 方向键微调选中签名：1pt，按住 Shift 10pt（对位压线比拖鼠标稳）
+  const step = e.shiftKey ? 10 : 1;
+  const delta = {ArrowLeft:[-step,0], ArrowRight:[step,0], ArrowUp:[0,-step], ArrowDown:[0,step]}[e.key];
+  if(delta && state.activeItem && state.docIdx === state.masterIdx){
+    const it = state.items.find(x => x.uid === state.activeItem);
+    if(!it) return;
+    e.preventDefault();
+    snapUndo();
+    const pg = pageSizePt();
+    it.x = Math.max(0, Math.min(pg.w - it.w, it.x + delta[0]));
+    it.y = Math.max(0, Math.min(pg.h - it.h, it.y + delta[1]));
+    renderItems(); renderItemList();
+  }
 });
 
 /* ---------- 导出 ---------- */
 $('#btnExport').onclick = async () => {
   if(!state.docId) return;
   if(!state.items.length){ toast('还没有放置任何签名', true); return; }
-  $('#btnExport').disabled = true; $('#status').textContent = '正在生成 PDF …';
+  const master = state.docs[state.masterIdx];
+  const batch = state.docs.length > 1;
+  const btn = $('#btnExport');
+  btn.disabled = true;
+  $('#status').textContent = batch ? `正在给 ${state.docs.length} 份 PDF 盖章 …` : '正在生成 PDF …';
   try{
-    const r = await fetch('/api/export', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({doc_id: state.docId, items: state.items, keep_ratio: true,
-                            filename: (state.docName || 'doc').replace(/\.pdf$/i,'') + '_已签章.pdf'})});
-    if(!r.ok){ const j = await r.json().catch(()=>({error:'导出失败'})); throw new Error(j.error||'导出失败'); }
-    const blob = await r.blob();
-    const enc = r.headers.get('X-Filename');
-    const name = enc ? decodeURIComponent(enc) : '已签章.pdf';
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-    $('#status').textContent = '已导出 ' + name;
-    toast('导出成功：' + name);
+    let r, name;
+    if(batch){
+      r = await fetch('/api/export_batch', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          master_id: master.docId,
+          ref_pages: master.pages.map(p => ({w_pt: p.w_pt, h_pt: p.h_pt})),
+          docs: state.docs.map(d => ({doc_id: d.docId, filename: d.name})),
+          items: state.items, keep_ratio: true})});
+      if(!r.ok){ const j = await r.json().catch(()=>({error:'批量导出失败'})); throw new Error(j.error||'批量导出失败'); }
+      const raw = r.headers.get('X-Batch-Report');
+      const rep = raw ? JSON.parse(decodeURIComponent(raw)) : null;
+      const blob = await r.blob();
+      const enc = r.headers.get('X-Filename');
+      name = enc ? decodeURIComponent(enc) : '批量签章.zip';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+      if(rep){
+        const bad = (rep.report || []).filter(x => !x.ok);
+        const skipped = (rep.report || []).reduce((n, x) => n + (x.skipped || 0), 0);
+        let msg = `批量导出完成：${rep.ok}/${rep.total} 份成功`;
+        if(skipped) msg += `，${skipped} 处章因页数不足跳过`;
+        if(bad.length) msg += `；失败 ${bad.length} 份：` + bad.map(x=>x.file).join('、');
+        toast(msg);
+        $('#status').textContent = msg + ' → ' + name;
+      }else{
+        toast('批量导出完成：' + name);
+        $('#status').textContent = '已导出 ' + name;
+      }
+    }else{
+      r = await fetch('/api/export', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({doc_id: state.docId, items: state.items, keep_ratio: true,
+                              filename: (state.docName || 'doc').replace(/\.pdf$/i,'') + '_已签章.pdf'})});
+      if(!r.ok){ const j = await r.json().catch(()=>({error:'导出失败'})); throw new Error(j.error||'导出失败'); }
+      const blob = await r.blob();
+      const enc = r.headers.get('X-Filename');
+      name = enc ? decodeURIComponent(enc) : '已签章.pdf';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+      $('#status').textContent = '已导出 ' + name;
+      toast('导出成功：' + name);
+    }
   }catch(err){ toast(err.message, true); $('#status').textContent = '导出失败'; }
-  $('#btnExport').disabled = false;
+  btn.disabled = false;
 };
 
 /* ---------- 通用输入弹窗 ---------- */
@@ -616,6 +983,33 @@ async function refreshProjects(selectName){
     return j.projects || [];
   }catch(e){ return []; }
 }
+
+/* 工程保存在主机 projects/ 下，其他电脑新建后这边点开下拉即可看到最新列表 */
+$('#projSel').addEventListener('focus', () => refreshProjects($('#projSel').value));
+
+/* ---------- 导入零安装版（网页版）保存的工程 ---------- */
+$('#btnImportProj').onclick = () => $('#fileProj').click();
+$('#fileProj').onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  let text = '';
+  try{ text = await f.text(); }catch(err){ toast('读取文件失败：' + err.message, true); return; }
+  try{
+    const r = await fetch('/api/project/import', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({data: text, filename: f.name})});
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error || '导入失败');
+    const got = j.imported || [];
+    if(!got.length){ toast('这个文件里没有可导入的工程', true); return; }
+    const first = got[0];
+    toast('已导入 ' + got.length + ' 个工程：' + got.map(x => x.name).join('、') +
+          '（' + first.n_items + ' 处 / ' + first.n_sigs + ' 个签名）');
+    await refreshProjects(first.name);
+  }catch(err){
+    toast('导入失败：' + err.message +
+          '（零安装版导出方法：浏览器 F12 → Console → 输入 copy(localStorage.getItem(\'signstudio_projects_v1\')) 回车 → 粘贴到记事本存成 .json）', true);
+  }
+  e.target.value = '';
+};
 
 $('#btnSaveProj').onclick = async () => {
   if(!state.items.length){ toast('还没有放置任何签名', true); return; }
@@ -662,7 +1056,7 @@ $('#btnLoadProj').onclick = async () => {
       const sx = r0 && r0.w_pt > 0 ? now.w_pt / r0.w_pt : 1;
       const sy = r0 && r0.h_pt > 0 ? now.h_pt / r0.h_pt : 1;
       items.push({uid: uid(), page: it.page, x: it.x * sx, y: it.y * sy,
-                  w: it.w * sx, h: it.h * sy, sigId: it.sigId});
+                  w: it.w * sx, h: it.h * sy, sigId: it.sigId, rot: it.rot || 0});
     });
     state.items = items;
     state.activeItem = null;
@@ -681,7 +1075,204 @@ function fileToB64(file){
   });
 }
 
-window.addEventListener('resize', () => { if(state.docId) applyZoom(); });
+/* ---------- 版本 / 自动更新 ---------- */
+const UPD = { phase: 'idle', info: null, ver: '', manual: false, applyTimer: null, relaunchTimer: null };
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function vtuple(t){
+  const p = String(t || '').replace(/^v/i, '').split('.'); const out = [];
+  for (const seg of p) { const m = String(seg).match(/^\d+/); out.push(m ? parseInt(m[0], 10) : 0); }
+  while (out.length < 3) out.push(0);
+  return out.slice(0, 3);
+}
+function isNewer(a, b){
+  const x = vtuple(a), y = vtuple(b);
+  for (let i = 0; i < 3; i++) { if (x[i] > y[i]) return true; if (x[i] < y[i]) return false; }
+  return false;
+}
+function verChip(txt, hasNew){
+  const el = $('#verChip');
+  el.textContent = txt;
+  el.classList.toggle('hasnew', !!hasNew);
+}
+function fmtSize(n){ return n ? (n / 1048576).toFixed(1) + ' MB' : ''; }
+
+function renderUpd(st, manual){
+  if(!st || !st.version) return;
+  UPD.phase = st.phase; UPD.ver = st.version;
+  if(st.info) UPD.info = st.info;
+  const bar = $('#updbar');
+  if(st.phase === 'available' && st.info){
+    const i = st.info;
+    verChip('v' + st.version, true);
+    bar.className = 'show';
+    bar.innerHTML =
+      '<div class="u"><b>发现新版本 v' + esc(i.version) + '</b>' +
+      '<span class="meta">当前 v' + esc(st.version) + ' · ' + fmtSize(i.size) + ' · ' +
+        esc(i.published || '') + ' · ' + esc(i.sig_msg || '') + '</span>' +
+        (i.notes ? '<div class="notes">' + esc(i.notes) + '</div>' : '') +
+        '<div class="manual">自动更新：点「立即更新」后自动下载 → sha256 校验 → 覆盖程序文件 → ' +
+        '用同一端口自动重启，页面几秒后自动刷新，无需手动拷文件。' +
+        '<br>你的 projects/（工程模板）、assets/seals/（签名图）、jobs/、in/、out/ 不会被覆盖；' +
+        '旧文件备份在 .update_backup/。也可以点「仅下载」自己手动覆盖。' +
+        '</div></div>' +
+      '<div class="prog"><i></i></div>' +
+      '<button class="btn primary" id="updApply">立即更新</button>' +
+      '<button class="btn" id="updDownload">仅下载</button>' +
+      '<button class="btn" id="updLater">稍后</button>';
+    $('#updApply').onclick = applyUpdate;
+    $('#updDownload').onclick = downloadUpdatePkg;
+    $('#updLater').onclick = () => { bar.className = ''; };
+  } else if(st.phase === 'downloading' || st.phase === 'installing'){
+    const ver = (st.info || UPD.info || {}).version || '';
+    bar.className = 'show busy';
+    bar.innerHTML =
+      '<div class="u"><b>正在更新到 v' + esc(ver) + '…</b>' +
+      '<span class="meta">' + esc(st.message || '') + '</span></div>' +
+      '<div class="prog"><i style="width:' + (st.progress || 0) + '%"></i></div>' +
+      '<span class="hint" style="color:#92400e">请勿关闭命令行窗口</span>';
+  } else if(st.phase === 'restarting'){
+    bar.className = 'show busy';
+    bar.innerHTML = '<div class="u"><b>更新完成，正在重启…</b>' +
+      '<span class="meta">页面会在几秒内自动刷新</span></div>' +
+      '<div class="prog"><i style="width:100%"></i></div>';
+  } else if(st.phase === 'error' && manual){
+    verChip('v' + st.version, false);
+    bar.className = 'show';
+    bar.innerHTML = '<div class="u"><b>检查更新失败</b><span class="meta">' +
+      esc(st.error || st.message || '') + '</span></div>' +
+      '<button class="btn" id="updRetry">重试</button>';
+    $('#updRetry').onclick = checkUpdateNow;
+  } else {
+    verChip('v' + st.version, false);
+    if(bar.classList.contains('busy')) return;
+    bar.className = '';
+  }
+}
+
+async function refreshVersion(manual){
+  try{
+    const r = await fetch('/api/version', {cache: 'no-store'});
+    const st = await r.json();
+    renderUpd(st, manual || UPD.manual);
+    return st;
+  }catch(e){ verChip('v?'); return null; }
+}
+
+async function checkUpdateNow(){
+  if(location.protocol === 'file:') return;
+  UPD.manual = true;
+  const chip = $('#verChip');
+  chip.textContent = '检查中…';
+  try{
+    const r = await fetch('/api/update/check', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'});
+    const st = await r.json();
+    renderUpd(st, true);
+    if(st.phase === 'uptodate') toast('已是最新版本 v' + st.version);
+    else if(st.phase === 'error') toast((st.error || '检查更新失败').split('\n')[0], true);
+    else if(st.phase === 'available') toast('发现新版本 v' + (st.info || {}).version + '，点「下载更新包」手动更新');
+  }catch(e){
+    toast('检查更新失败：' + e.message, true);
+    refreshVersion(true);
+  }
+}
+
+/* 一键自动更新：下载 → 校验 → 覆盖 → 同端口重启（后端做，前端只轮询进度） */
+async function applyUpdate(){
+  const info = UPD.info || {};
+  if(!confirm('更新到 v' + (info.version || '') + ' ？\n\n' +
+              '更新包约 ' + fmtSize(info.size) + '，程序会自动下载并覆盖程序文件，' +
+              '完成后自动重启（页面自动刷新）。\n' +
+              '你的签名工程、签名图等数据不会被覆盖。')) return;
+  try{
+    const r = await fetch('/api/update/apply', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'});
+    const j = await r.json();
+    if(!j.ok){ toast(j.error || '更新失败', true); return; }
+    toast('开始下载更新包…');
+    startApplyPolling();
+  }catch(e){ toast('更新失败：' + e.message, true); }
+}
+
+/* 仅下载：不走自动安装，自己解压覆盖（可选路径） */
+function downloadUpdatePkg(){
+  const info = UPD.info || {};
+  const name = 'SignStudio-v' + (info.version || '新版本') + '.zip';
+  toast('正在下载 ' + name + ' …');
+  const a = document.createElement('a');
+  a.href = '/api/update/download';
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  localStorage.setItem('ss_manual_update_pending', String(Date.now()));
+  localStorage.setItem('ss_manual_update_target', String(info.version || ''));
+  setTimeout(() => toast('下载完成后：解压 → 覆盖到程序文件夹 → 重启工具'), 2600);
+}
+
+function startApplyPolling(){
+  clearInterval(UPD.applyTimer);
+  UPD.applyTimer = setInterval(async () => {
+    try{
+      const r = await fetch('/api/update/status', {cache: 'no-store'});
+      const st = await r.json();
+      renderUpd(st, true);
+      if(st.phase === 'error'){
+        clearInterval(UPD.applyTimer);
+        toast((st.error || '更新失败').split('\n')[0], true);
+      }
+      if(st.phase === 'restarting'){
+        clearInterval(UPD.applyTimer);
+        waitRelaunch(st.version);
+      }
+    }catch(e){ /* 服务正在退出，属正常 */ }
+  }, 600);
+}
+
+function waitRelaunch(oldVersion){
+  localStorage.setItem('ss_pending_update', String(Date.now()));
+  clearInterval(UPD.relaunchTimer);
+  const t0 = Date.now();
+  UPD.relaunchTimer = setInterval(async () => {
+    try{
+      const r = await fetch('/api/version', {cache: 'no-store'});
+      const st = await r.json();
+      if(st.version && st.version !== oldVersion){
+        clearInterval(UPD.relaunchTimer);
+        localStorage.setItem('ss_version_seen', st.version);
+        location.reload();
+      }
+    }catch(e){ /* 还在重启 */ }
+    if(Date.now() - t0 > 90000){
+      clearInterval(UPD.relaunchTimer);
+      const bar = $('#updbar');
+      bar.className = 'show';
+      bar.innerHTML = '<div class="u"><b>更新已装好，但页面连不上新进程</b>' +
+        '<span class="meta">请关闭本页，重新运行启动脚本（START_HERE.bat / start_studio.sh）</span></div>' +
+        '<button class="btn" onclick="location.reload()">刷新</button>';
+    }
+  }, 1000);
+}
+
+// 更新完第一次打开：提示“已更新到 vX”
+(function announceUpdate(){
+  const target = localStorage.getItem('ss_manual_update_target');
+  if(target && UPD.ver && !isNewer(target, UPD.ver)){
+    localStorage.removeItem('ss_manual_update_target');
+    localStorage.removeItem('ss_manual_update_pending');
+    setTimeout(() => toast('已更新到 v' + (UPD.ver || '') + '，可以正常使用'), 1200);
+    return;
+  }
+  const pend = localStorage.getItem('ss_pending_update');
+  if(!pend) return;
+  localStorage.removeItem('ss_pending_update');
+  setTimeout(() => toast('已更新到 v' + (UPD.ver || '') + '，可以正常使用'), 1200);
+})();
+
+$('#verChip').addEventListener('click', checkUpdateNow);
+refreshVersion(false);
+// 启动时的自动检查在后台跑，1.2s 后再取一次结果（自动检查发现新版本也会顶出横幅）
+setTimeout(() => refreshVersion(false), 1400);
+setTimeout(() => refreshVersion(false), 4500);
+
+window.addEventListener('resize', () => { if(state.docId) refit(); });
 refreshProjects();
 </script>
 </body>

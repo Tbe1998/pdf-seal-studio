@@ -9,9 +9,12 @@
   4. 启动 SignStudio 图形界面
 
 用法：
-  python start.py            启动界面
+  python start.py            启动界面（启动时后台自动检查更新）
   python start.py --check    只做依赖自检，不启动
   python start.py --diag     生成诊断报告 _诊断报告.txt（发给技术支持）
+  python start.py --check-update  只检查有没有新版本
+  python start.py --update        检查并安装更新（会重启界面）
+  python start.py --no-update-check  本次启动不检查更新（离线用）
 """
 from __future__ import annotations
 
@@ -22,6 +25,11 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+
+try:
+    import version as vmod
+except Exception:                                            # noqa: BLE001
+    vmod = None
 
 MIRRORS = [
     ("清华镜像", "https://pypi.tuna.tsinghua.edu.cn/simple"),
@@ -181,9 +189,15 @@ def main():
     if "--diag" in args:
         return diag_report()
 
+    if "--check-update" in args or "--update" in args:
+        passthrough = ["--check"] if "--check-update" in args else ["--install"]
+        p = subprocess.run([sys.executable, os.path.join(HERE, "updater.py")] + passthrough)
+        return p.returncode
+
     info = py_info()
     hr()
     log("  SignStudio 启动检查")
+    log(f"  版本   v{getattr(vmod, 'VERSION', '?')}")
     log(f"  Python {info['python']}  ({'虚拟环境' if info['in_venv'] else '系统环境'})")
     log(f"  路径   {info['executable']}")
     hr()

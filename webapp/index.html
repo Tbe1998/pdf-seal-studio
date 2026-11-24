@@ -18,6 +18,15 @@
   header h1{font-size:15px;margin:0 10px 0 0;font-weight:600;white-space:nowrap;flex:0 0 auto}
   header h1 span{color:var(--blue)}
   .ver{font-size:11px;color:#9aa3b0;margin-left:-4px}
+  .verchip{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:20px;
+           padding:2px 9px;cursor:pointer;background:#f8fafc;white-space:nowrap}
+  .verchip.hasnew{background:#fff7ed;border-color:#fdba74;color:#c2410c;font-weight:600}
+  #updbar{display:none;background:#fffbeb;border-bottom:1px solid #fcd34d;color:#78350f;
+          padding:9px 16px;font-size:13px;line-height:1.6}
+  #updbar b{font-weight:600}
+  #updbar .meta{font-size:11.5px;color:#92400e;opacity:.85}
+  #updbar .notes{font-size:12px;white-space:pre-wrap;margin-top:4px}
+  #updbar a{color:#b45309;font-weight:600}
   .btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:7px;
        border:1px solid var(--line);background:#fff;color:var(--txt);cursor:pointer;font-size:13px;
        white-space:nowrap;user-select:none;transition:.15s}
@@ -46,21 +55,32 @@
   .sig .nm{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
   .sig .del{color:#c0c7d2;font-size:15px;padding:0 3px}
   .sig .del:hover{color:var(--red)}
+  .doclist{max-height:32vh;overflow:auto;padding:8px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .doc{padding:7px 8px;border:1.5px solid transparent;border-radius:8px;cursor:pointer;font-size:12px}
+  .doc:hover{background:#f8fafc}
+  .doc.active{border-color:var(--blue);background:var(--blue-l)}
+  .doc .t{display:flex;align-items:center;gap:6px}
+  .doc .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .doc .meta{color:var(--muted);font-size:11px;margin-top:2px}
+  .doc .badge{flex:0 0 auto;font-size:10px;padding:1px 5px;border-radius:20px;background:var(--blue);color:#fff}
+  .doc .badge.follow{background:#e2e8f0;color:#64748b}
+  .doc .op{color:#94a3b8;font-size:11px;padding:0 2px}
+  .doc .op:hover{color:var(--red)}
   .sizer{padding:9px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
   .sizer input{width:62px;height:26px;border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:12px}
-  .center{display:flex;flex-direction:column;min-width:0;background:#e9edf2}
+  .center{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#e9edf2}
   .toolbar{min-height:42px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--panel);
            border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted);flex-wrap:wrap}
   .toolbar .btn{height:28px;padding:0 9px;font-size:12.5px}
   .toolbar input[type=number]{width:52px;height:26px;border:1px solid var(--line);border-radius:5px;
        text-align:center;font-size:12.5px}
-  .stage{flex:1;overflow:auto;padding:18px;display:flex;justify-content:center;align-items:flex-start}
+  .stage{flex:1;min-height:0;overflow:auto;padding:18px;display:flex;justify-content:center;align-items:flex-start}
   .pagewrap{position:relative;background:#fff;box-shadow:var(--shadow);max-width:100%;
             cursor:crosshair;user-select:none;flex:0 0 auto}
   .pagewrap canvas{display:block;pointer-events:none}
   .placeholder{color:#8a93a3;text-align:center;margin:auto;font-size:13px;line-height:2}
   .placeholder b{display:block;font-size:15px;color:#5b6472;margin-bottom:4px}
-  .item{position:absolute;border:1.5px dashed #94a3b8;cursor:move}
+  .item{position:absolute;border:1.5px dashed #94a3b8;cursor:move;transform-origin:center center}
   .item img{width:100%;height:100%;display:block;pointer-events:none}
   .item.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.18)}
   .item .handle{position:absolute;right:-6px;bottom:-6px;width:12px;height:12px;background:var(--blue);
@@ -84,6 +104,14 @@
        padding:0 5px;font-size:12px;text-align:right}
   .props .prow em{font-style:normal;font-size:11px;color:#9aa3b0;margin-right:4px}
   .props .chk{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer}
+  .props .mini{height:24px;padding:0 7px;font-size:11.5px;border:1px solid var(--line);border-radius:5px;
+       background:#fff;color:#475569;cursor:pointer}
+  .props .mini:hover{border-color:var(--blue);color:var(--blue)}
+  .sizer .chk{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:#64748b;cursor:pointer;
+       white-space:nowrap}
+  .sizer .chk input[type=checkbox]{width:auto;height:auto;margin:0}
+  .sizer .chk input[type=number]{width:52px}
+  .sizer .chk input:disabled{opacity:.5}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;
          background:#111827;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;
          transition:.25s;pointer-events:none;z-index:99;max-width:80%;white-space:pre-wrap}
@@ -104,13 +132,16 @@
 </head>
 <body>
 <div id="banner"></div>
+<div id="updbar"></div>
 <header>
   <h1>Sign<span>Studio</span></h1><span class="ver">零安装版</span>
-  <button class="btn" id="btnPdf">＋ 打开 PDF</button>
+  <span class="verchip" id="verChip" title="点击检查更新">v…</span>
+  <button class="btn" id="btnPdf" title="可一次选择多个 PDF：在第一个文件上盖章，其余文件按同一套位置批量盖章">＋ 打开 PDF（可多选）</button>
   <button class="btn" id="btnSig">＋ 导入签名 PNG</button>
   <div style="width:1px;height:22px;background:var(--line)"></div>
   <button class="btn" id="btnLoadProj">载入工程</button>
   <button class="btn" id="btnSaveProj" disabled>保存为工程</button>
+  <button class="btn" id="btnExportProj" title="把浏览器里保存的全部工程导出成 JSON，可在完整版点「导入工程」使用">导出工程</button>
   <div class="spacer"></div>
   <span class="hint" id="status">先打开 PDF，再导入签名图片</span>
   <div class="spacer"></div>
@@ -119,11 +150,18 @@
 
 <main>
   <aside class="left">
+    <div class="ph">PDF 文件 <span id="docCount">0</span></div>
+    <div class="doclist" id="docList"><div class="empty">还没有打开 PDF<br>点顶部「打开 PDF」可一次选多个</div></div>
     <div class="ph">签名库 <span id="sigCount">0</span></div>
     <div class="list" id="sigList"><div class="empty">还没有签名<br>点顶部「导入签名 PNG」</div></div>
     <div class="sizer">
       默认宽度 <input id="defW" type="number" min="5" max="200" step="1" value="30"> mm
       <div style="margin-top:6px;color:#9aa3b0;font-size:11px">放置时按此宽度，高度自动等比</div>
+      <label class="chk" title="勾选后，新放置的签名会自动带一个随机倾斜角（选中后可在右侧单独调整）">
+        <input type="checkbox" id="randRot"> 随机倾斜
+        <span style="color:#9aa3b0">±</span>
+        <input id="randRotMax" type="number" min="0.2" max="30" step="0.1" value="2.5" disabled> °
+      </label>
     </div>
   </aside>
 
@@ -134,7 +172,8 @@
       <button class="btn" id="nextPage">下一页 ›</button>
       <div style="width:1px;height:18px;background:var(--line)"></div>
       <button class="btn" id="zoomOut">－</button><span id="zoomVal">100%</span><button class="btn" id="zoomIn">＋</button>
-      <button class="btn" id="zoomFit">适应宽度</button>
+      <button class="btn" id="zoomFit" title="页面宽度撑满窗口">适应宽度</button>
+      <button class="btn" id="zoomPage" title="整页完整显示（打开文件时的默认）">适应页面</button>
       <div class="spacer"></div>
       <span class="hint">选签名 → 页面上拖框盖章（单击=按默认尺寸放置）</span>
     </div>
@@ -160,6 +199,9 @@
         <span>高</span><input id="pH" type="number" step="0.5" min="1"><em>mm</em></div>
       <div class="prow"><span>X</span><input id="pX" type="number" step="0.5"><em>mm</em>
         <span>Y</span><input id="pY" type="number" step="0.5"><em>mm</em></div>
+      <div class="prow"><span>倾斜</span><input id="pRot" type="number" step="0.1" min="-45" max="45"><em>°</em>
+        <button class="mini" id="pRotDice" title="为这一处随机一个倾斜角">随机</button>
+        <button class="mini" id="pRotZero" title="恢复水平">归零</button></div>
       <label class="chk" title="勾选时：改宽高任一边，另一边自动按原图比例跟随；取消勾选可自由拉伸"><input type="checkbox" id="pRatio" checked> 按原比例（改一边另一边自动跟随）</label>
     </div>
   </aside>
@@ -168,7 +210,7 @@
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
 
-<input type="file" id="filePdf" accept="application/pdf,.pdf"
+<input type="file" id="filePdf" accept="application/pdf,.pdf" multiple
        style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0">
 <input type="file" id="fileSig" accept="image/png,image/*" multiple
        style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0">
@@ -181,11 +223,13 @@ const $ = s => document.querySelector(s);
 const EXPORT_DPI = 300;
 
 const S = {
+  docs: [], docIdx: 0, masterIdx: 0,   // 批量 PDF：第一份为基准（可盖章），其余按同一套位置套章
   file: null, pdfBytes: null, pdf: null, npages: 0, page: 1,
-  zoom: 1, viewportScale: 1,
+  zoom: 1, viewportScale: 1, fitMode: 'page',
   sigs: [], activeSig: null,
   items: [], activeItem: null,
   defaultMm: 30, docName: '',
+  randRot: false, randRotMax: 2.5,   // 新放置的章是否随机倾斜 / 最大角度(°)
   renderTask: null,
 };
 
@@ -200,6 +244,46 @@ function toast(msg, err){
 function banner(html){ const b = $('#banner'); b.innerHTML = html; b.style.display = 'block'; }
 function uid(){ return Math.random().toString(36).slice(2, 10); }
 function fmt(n){ return Math.round(n * 10) / 10; }
+
+/* ---------- 倾斜角：随机 / 归一化 ----------
+ * rot 单位度，逆时针为正（和 PDF 一致）；CSS/画布预览用 -rot。
+ * 随机值避开 0 附近，否则看起来和没倾斜一样。
+ */
+function normRot(v){
+  let r = parseFloat(v); if (isNaN(r)) r = 0;
+  r = ((r + 180) % 360 + 360) % 360 - 180;
+  return Math.round(r * 10) / 10;
+}
+function randAngle(){
+  const m = Math.max(0, Math.min(45, parseFloat(S.randRotMax) || 0));
+  if (m <= 0) return 0;
+  const lo = Math.min(m, Math.max(0.2, m * 0.35));
+  const a = lo + Math.random() * (m - lo);
+  return Math.round((Math.random() < 0.5 ? -a : a) * 10) / 10;
+}
+(function initRotUI(){
+  const on = $('#randRot'), mx = $('#randRotMax');
+  if (!on || !mx) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem('signstudio_randrot_v1') || 'null');
+    if (saved) {
+      on.checked = !!saved.on;
+      S.randRotMax = Math.max(0.2, Math.min(30, parseFloat(saved.max) || 2.5));
+      mx.value = S.randRotMax;
+    }
+  } catch (e) {}
+  S.randRot = on.checked;
+  mx.disabled = !on.checked;
+  const save = () => {
+    try { localStorage.setItem('signstudio_randrot_v1',
+      JSON.stringify({on: S.randRot, max: S.randRotMax})); } catch (e) {}
+  };
+  on.onchange = () => { S.randRot = on.checked; mx.disabled = !on.checked; save(); };
+  mx.oninput = mx.onchange = () => {
+    S.randRotMax = Math.max(0.2, Math.min(30, parseFloat(mx.value) || 2.5));
+    save();
+  };
+})();
 function mmToPt(mm){ return mm * PT; }
 
 function dataUrlToBytes(dataUrl){
@@ -228,33 +312,130 @@ function askInput(title, label, defVal){
   });
 }
 
-/* ------------ 打开 PDF ------------ */
+/* ------------ 打开 PDF（支持一次多选，批量盖章） ------------ */
 $('#btnPdf').onclick = () => $('#filePdf').click();
 $('#filePdf').onchange = async e => {
-  const f = e.target.files[0]; e.target.value = '';
-  if (!f) return;
-  if (!/\.pdf$/i.test(f.name)) { toast('请选择 PDF 文件', true); return; }
-  $('#status').textContent = '正在打开 ' + f.name + ' …';
-  try {
-    const buf = new Uint8Array(await f.arrayBuffer());
-    S.file = f; S.pdfBytes = buf; S.docName = f.name;
-    S.pdf = await pdfjsLib.getDocument({data: buf.slice(0)}).promise;
-    S.npages = S.pdf.numPages; S.page = 1; S.items = []; S.activeItem = null;
-    $('#pageTotal').textContent = S.npages;
-    $('#pageNo').max = S.npages; $('#pageNo').value = 1;
-    $('#placeholder').style.display = 'none';
-    $('#pagewrap').style.display = 'block';
-    $('#btnExport').disabled = false; $('#btnSaveProj').disabled = false;
-    $('#status').textContent = f.name + ' · ' + S.npages + ' 页';
-    await loadPage(1);
-    fitWidth();
-    renderItemList();
-  } catch (err) {
-    console.error(err);
-    toast('打开 PDF 失败：' + (err && err.message || err), true);
-    $('#status').textContent = '打开失败';
+  const files = Array.from(e.target.files).filter(f => /\.pdf$/i.test(f.name));
+  e.target.value = '';
+  if (!files.length) { toast('请选择 PDF 文件', true); return; }
+  const firstTime = S.docs.length === 0;
+  let added = 0;
+  for (let k = 0; k < files.length; k++) {
+    const f = files[k];
+    $('#status').textContent = `正在读取 ${k + 1}/${files.length}：${f.name} …`;
+    try {
+      const bytes = new Uint8Array(await f.arrayBuffer());
+      const pdf = await pdfjsLib.getDocument({data: bytes.slice(0)}).promise;
+      const sizes = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const p = await pdf.getPage(i);
+        const v = p.getViewport({scale: 1});
+        sizes.push({w: v.width, h: v.height});
+      }
+      S.docs.push({name: f.name, bytes, pdf, npages: pdf.numPages, sizes});
+      added++;
+    } catch (err) {
+      console.error(err);
+      toast(f.name + ' 打开失败：' + (err && err.message || err), true);
+    }
   }
+  if (!added) { $('#status').textContent = '打开失败'; return; }
+  if (firstTime) { S.masterIdx = 0; S.items = []; S.activeItem = null; }
+  if (S.masterIdx >= S.docs.length) S.masterIdx = 0;
+  await switchDoc(firstTime ? 0 : S.docs.length - added);
+  renderDocs();
+  if (S.docs.length > 1)
+    toast(`已导入 ${S.docs.length} 份 PDF。在「主」文件上盖章，导出时其余文件按同一位置批量盖章`);
 };
+
+/* 把某一份 PDF 设为当前预览 */
+async function switchDoc(idx) {
+  if (idx < 0 || idx >= S.docs.length) return;
+  const d = S.docs[idx];
+  S.docIdx = idx;
+  S.pdfBytes = d.bytes; S.pdf = d.pdf; S.npages = d.npages;
+  S.docName = d.name; S.page = 1; S.activeItem = null;
+  $('#pageTotal').textContent = d.npages;
+  $('#pageNo').max = d.npages; $('#pageNo').value = 1;
+  $('#placeholder').style.display = 'none';
+  $('#pagewrap').style.display = 'block';
+  $('#btnExport').disabled = false;
+  syncButtons();
+  $('#status').textContent = d.name + ' · ' + d.npages + ' 页' +
+    (idx === S.masterIdx ? ' · 基准文件（可盖章）' : ' · 跟随文件（只读预览，按基准位置等比映射）');
+  $('#pagewrap').style.cursor = (idx === S.masterIdx) ? 'crosshair' : 'default';
+  await loadPage(1);
+  S.fitMode = 'page'; fitPage();
+  renderDocs(); renderItems(); renderItemList();
+}
+
+/* 设为主文件：把已有章位按页尺寸比例换算到新基准 */
+async function setMaster(idx) {
+  if (idx < 0 || idx >= S.docs.length || idx === S.masterIdx) return;
+  const oldD = S.docs[S.masterIdx], nuD = S.docs[idx];
+  S.items.forEach(it => {
+    const op = oldD.sizes[it.page - 1], np = nuD.sizes[it.page - 1];
+    if (!op || !np || !op.w || !op.h) return;
+    const sx = np.w / op.w, sy = np.h / op.h;
+    it.x *= sx; it.y *= sy; it.w *= sx; it.h *= sy;
+  });
+  S.masterIdx = idx;
+  await switchDoc(idx);
+  toast('已把「' + nuD.name + '」设为基准文件');
+}
+
+function removeDoc(idx) {
+  if (idx < 0 || idx >= S.docs.length) return;
+  const wasMaster = idx === S.masterIdx;
+  S.docs.splice(idx, 1);
+  if (!S.docs.length) {
+    S.docIdx = S.masterIdx = 0; S.pdf = null; S.pdfBytes = null; S.npages = 0;
+    S.items = []; S.activeItem = null; S.docName = '';
+    $('#pagewrap').style.display = 'none'; $('#placeholder').style.display = 'block';
+    syncButtons();
+    $('#pageTotal').textContent = '0'; $('#status').textContent = '先打开一份 PDF，再导入签名图片';
+    renderDocs(); renderItems(); renderItemList(); return;
+  }
+  if (idx < S.masterIdx) S.masterIdx--;
+  else if (wasMaster) S.masterIdx = 0;
+  if (S.docIdx >= S.docs.length) S.docIdx = S.docs.length - 1;
+  switchDoc(S.docIdx);
+}
+
+function renderDocs() {
+  const box = $('#docList');
+  $('#docCount').textContent = S.docs.length;
+  $('#btnExport').textContent = S.docs.length > 1
+    ? `⤓ 批量导出（${S.docs.length} 份）` : '⤓ 一键导出 PDF';
+  if (!S.docs.length) {
+    box.innerHTML = '<div class="empty">还没有打开 PDF<br>点顶部「打开 PDF」可一次选多个</div>';
+    return;
+  }
+  box.innerHTML = '';
+  S.docs.forEach((d, i) => {
+    const isM = i === S.masterIdx;
+    const el = document.createElement('div');
+    el.className = 'doc' + (i === S.docIdx ? ' active' : '');
+    const t = document.createElement('div'); t.className = 't';
+    const bg = document.createElement('span');
+    bg.className = 'badge' + (isM ? '' : ' follow'); bg.textContent = isM ? '主' : '跟随';
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.title = d.name; nm.textContent = d.name;
+    t.append(bg, nm);
+    if (!isM) {
+      const sm = document.createElement('span'); sm.className = 'op setm'; sm.title = '设为基准文件';
+      sm.textContent = '设为主'; sm.onclick = ev => { ev.stopPropagation(); setMaster(i); };
+      t.appendChild(sm);
+    }
+    const dl = document.createElement('span'); dl.className = 'op del'; dl.title = '移除'; dl.textContent = '✕';
+    dl.onclick = ev => { ev.stopPropagation(); removeDoc(i); };
+    t.appendChild(dl);
+    const meta = document.createElement('div'); meta.className = 'meta';
+    meta.textContent = `${d.npages} 页 · ${fmt(d.sizes[0] ? d.sizes[0].w : 0)}×${fmt(d.sizes[0] ? d.sizes[0].h : 0)} pt`;
+    el.append(t, meta);
+    el.onclick = () => switchDoc(i);
+    box.appendChild(el);
+  });
+}
 
 async function loadPage(p){
   if (!S.pdf) return;
@@ -288,19 +469,46 @@ function applyZoom(){
   $('#zoomVal').textContent = Math.round(S.zoom * 100) + '%';
   loadPage(S.page);
 }
+function availBox(){
+  const st = $('#stage');
+  // .stage padding:18px 两侧各一,再留 8px 余量给滚动条/阴影
+  return {w: Math.max(80, st.clientWidth - 44), h: Math.max(80, st.clientHeight - 44)};
+}
+/* 适应宽度：宽度撑满，页面可能比窗口高（需要上下滚动） */
 function fitWidth(){
   if (!S.ptW) return;
-  const avail = $('#stage').clientWidth - 44;
+  S.fitMode = 'width';
+  const avail = availBox().w;
   const w96 = S.ptW * 96 / 72;
   S.zoom = Math.max(0.2, Math.min(3, avail / w96));
   applyZoom();
 }
-$('#zoomIn').onclick = () => { S.zoom = Math.min(3, S.zoom * 1.15); applyZoom(); };
-$('#zoomOut').onclick = () => { S.zoom = Math.max(0.2, S.zoom / 1.15); applyZoom(); };
+/* 适应页面：整页完整显示在窗口内，A4 打开即可看全（默认） */
+function fitPage(){
+  if (!S.ptW) return;
+  S.fitMode = 'page';
+  const box = availBox();
+  const w96 = S.ptW * 96 / 72, h96 = S.ptH * 96 / 72;
+  S.zoom = Math.max(0.2, Math.min(3, Math.min(box.w / w96, box.h / h96)));
+  applyZoom();
+}
+function refit(){
+  if (!S.ptW) return;
+  if (S.fitMode === 'manual') return;
+  if (S.fitMode === 'width') fitWidth(); else fitPage();
+}
+/* 翻页后按当前模式重新适配（不同页尺寸可能不同） */
+async function goPage(p){
+  await loadPage(p);
+  refit();
+}
+$('#zoomIn').onclick = () => { S.fitMode = 'manual'; S.zoom = Math.min(3, S.zoom * 1.15); applyZoom(); };
+$('#zoomOut').onclick = () => { S.fitMode = 'manual'; S.zoom = Math.max(0.2, S.zoom / 1.15); applyZoom(); };
 $('#zoomFit').onclick = () => fitWidth();
-$('#prevPage').onclick = () => loadPage(S.page - 1);
-$('#nextPage').onclick = () => loadPage(S.page + 1);
-$('#pageNo').onchange = e => loadPage(parseInt(e.target.value || '1', 10));
+$('#zoomPage').onclick = () => fitPage();
+$('#prevPage').onclick = () => goPage(S.page - 1);
+$('#nextPage').onclick = () => goPage(S.page + 1);
+$('#pageNo').onchange = e => goPage(parseInt(e.target.value || '1', 10));
 
 /* ------------ 签名库 ------------ */
 $('#btnSig').onclick = () => $('#fileSig').click();
@@ -406,9 +614,12 @@ let drag = null;
 
 wrap.addEventListener('mousedown', e => {
   if (!S.pdf || e.button !== 0) return;
+  if (S.docIdx !== S.masterIdx) { toast('当前是跟随文件（只读预览）。请切回标「主」的文件盖章'); return; }
   const rect = wrap.getBoundingClientRect();
   const target = e.target.closest('.item');
   if (target) {
+    // 点右上角的小叉：立刻删除并返回（先 renderItems 会换掉节点，click 派发不到，看起来像没反应）
+    if (e.target.classList.contains('x')) { e.preventDefault(); removeItem(target.dataset.uid); return; }
     const it = S.items.find(x => x.uid === target.dataset.uid);
     if (!it) return;
     S.activeItem = it.uid; renderItems(); renderItemList();
@@ -469,12 +680,22 @@ window.addEventListener('mouseup', e => {
     }
     x = Math.max(0, Math.min((S.ptW || 1e6) - w, x));
     y = Math.max(0, Math.min((S.ptH || 1e6) - h, y));
-    const it = {uid: uid(), page: S.page, x, y, w, h, sigId: S.activeSig};
+    const it = {uid: uid(), page: S.page, x, y, w, h, sigId: S.activeSig,
+                rot: S.randRot ? randAngle() : 0};
     S.items.push(it); S.activeItem = it.uid;
     renderItems(); renderItemList();
   }
   drag = null;
 });
+
+/* 章位坐标以「主文件」为基准；预览其他文件时按页尺寸等比映射（只读） */
+function scaleFor(page){
+  const m = S.docs[S.masterIdx], v = S.docs[S.docIdx];
+  if (!m || !v || m === v) return {sx: 1, sy: 1};
+  const mp = m.sizes[page - 1], vp = v.sizes[page - 1];
+  if (!mp || !vp || !mp.w || !mp.h) return {sx: 1, sy: 1};
+  return {sx: vp.w / mp.w, sy: vp.h / mp.h};
+}
 
 function renderItems(){
   const box = $('#items');
@@ -482,13 +703,15 @@ function renderItems(){
   S.items.filter(it => it.page === S.page).forEach(it => {
     const sig = S.sigs.find(s => s.id === it.sigId);
     if (!sig) return;
+    const sc = scaleFor(it.page);
     const d = document.createElement('div');
     d.className = 'item' + (it.uid === S.activeItem ? ' active' : '');
     d.dataset.uid = it.uid;
-    d.style.left = ptToCss(it.x) + 'px';
-    d.style.top = ptToCss(it.y) + 'px';
-    d.style.width = ptToCss(it.w) + 'px';
-    d.style.height = ptToCss(it.h) + 'px';
+    d.style.left = ptToCss(it.x * sc.sx) + 'px';
+    d.style.top = ptToCss(it.y * sc.sy) + 'px';
+    d.style.width = ptToCss(it.w * sc.sx) + 'px';
+    d.style.height = ptToCss(it.h * sc.sy) + 'px';
+    if (it.rot) d.style.transform = `rotate(${-it.rot}deg)`;   // CSS 顺时针为正 → 取负
     const im = document.createElement('img'); im.src = sig.dataUrl;
     const hd = document.createElement('div'); hd.className = 'handle';
     const xb = document.createElement('div'); xb.className = 'x'; xb.title = '删除'; xb.textContent = '✕';
@@ -507,21 +730,24 @@ function syncProps(){
   const box = $('#props');
   if(!box) return;
   const it = S.items.find(x => x.uid === S.activeItem);
-  if(!it){ box.style.display = 'none'; return; }
+  if(!it || S.docIdx !== S.masterIdx){ box.style.display = 'none'; return; }
   box.style.display = 'block';
   if(document.activeElement !== $('#pW')) $('#pW').value = fmt(ptToMm(it.w));
   if(document.activeElement !== $('#pH')) $('#pH').value = fmt(ptToMm(it.h));
   if(document.activeElement !== $('#pX')) $('#pX').value = fmt(ptToMm(it.x));
   if(document.activeElement !== $('#pY')) $('#pY').value = fmt(ptToMm(it.y));
+  if(document.activeElement !== $('#pRot')) $('#pRot').value = fmt(it.rot || 0);
 }
 
 /**
  * kind='w' 正在改宽 → 高自动按原图比例跟随
  * kind='h' 正在改高 → 宽自动按原图比例跟随
  * kind='xy' 只改位置
+ * kind='rot' 只改倾斜角（度，逆时针为正）
  * 勾选「按原比例」时始终等比；取消勾选可自由拉伸（改哪边动哪边）。
  */
 function applyProps(kind){
+  if (S.docIdx !== S.masterIdx) return;
   const it = S.items.find(x => x.uid === S.activeItem);
   if(!it) return;
   const sig = S.sigs.find(s => s.id === it.sigId);
@@ -543,6 +769,8 @@ function applyProps(kind){
     const ymm = parseFloat($('#pY').value);
     if(!isNaN(xmm)) it.x = mmToPt2(xmm);
     if(!isNaN(ymm)) it.y = mmToPt2(ymm);
+  } else if(kind === 'rot'){
+    it.rot = normRot($('#pRot').value);
   }
   it.x = Math.max(0, Math.min(Math.max(0, (S.ptW || 1e6) - it.w), it.x));
   it.y = Math.max(0, Math.min(Math.max(0, (S.ptH || 1e6) - it.h), it.y));
@@ -553,17 +781,28 @@ $('#pW').addEventListener('input', () => applyProps('w'));
 $('#pH').addEventListener('input', () => applyProps('h'));
 $('#pX').addEventListener('input', () => applyProps('xy'));
 $('#pY').addEventListener('input', () => applyProps('xy'));
+$('#pRot').addEventListener('input', () => applyProps('rot'));
+$('#pRotDice').onclick = () => { $('#pRot').value = randAngle(); applyProps('rot'); };
+$('#pRotZero').onclick = () => { $('#pRot').value = 0; applyProps('rot'); };
 const ratioEl2 = $('#pRatio');
 if(ratioEl2) ratioEl2.addEventListener('change', () => { if(ratioEl2.checked) applyProps(); });
 
 function removeItem(uidv){
+  // 章位是全局共用的，任何预览状态下都应该能删（只读限制只针对移动/改尺寸）
   S.items = S.items.filter(x => x.uid !== uidv);
   if (S.activeItem === uidv) S.activeItem = null;
   renderItems(); renderItemList();
 }
 
+function syncButtons(){
+  const hasDoc = !!S.pdfBytes;
+  $('#btnExport').disabled = !hasDoc;
+  $('#btnSaveProj').disabled = !hasDoc || !S.items.length;
+}
+
 function renderItemList(){
   syncProps();
+  syncButtons();
   $('#itemCount').textContent = S.items.length;
   const box = $('#itemList');
   if (!S.items.length) {
@@ -576,7 +815,7 @@ function renderItemList(){
     const d = document.createElement('div');
     d.className = 'row' + (it.uid === S.activeItem ? ' active' : '');
     d.innerHTML = `<div class="t"><b>第 ${it.page} 页 · ${sig ? sig.name : '?'}</b><span class="del" title="删除">✕</span></div>
-      <div class="meta">位置 ${fmt(it.x)}, ${fmt(it.y)} pt · 尺寸 ${fmt(it.w)}×${fmt(it.h)} pt（${fmt(it.w/PT)}×${fmt(it.h/PT)} mm）</div>`;
+      <div class="meta">位置 ${fmt(it.x)}, ${fmt(it.y)} pt · 尺寸 ${fmt(it.w)}×${fmt(it.h)} pt（${fmt(it.w/PT)}×${fmt(it.h/PT)} mm）${it.rot ? ' · 倾斜 ' + fmt(it.rot) + '°' : ''}</div>`;
     d.onclick = ev => {
       if (ev.target.classList.contains('del')) { removeItem(it.uid); return; }
       S.activeItem = it.uid;
@@ -594,73 +833,196 @@ document.addEventListener('keydown', e => {
 });
 
 /* ------------ 导出（含正片叠底，章不遮挡底层内容）------------ */
+/* 给一份 PDF 盖上 items（坐标以「基准文件」pt 计），返回 PDF 字节 */
+async function buildStamped(docEntry, items, refSizes) {
+  const {PDFDocument} = PDFLib;
+  const doc = await PDFDocument.load(docEntry.bytes);
+  const pages = doc.getPages();
+  const scale = EXPORT_DPI / 72;
+  const byPage = {};
+  items.forEach(it => {
+    const pno = it.page;
+    if (pno < 1 || pno > docEntry.npages) return;       // 页数不足：跳过该处
+    const ref = refSizes[pno - 1], now = docEntry.sizes[pno - 1];
+    const sx = (ref && ref.w && now) ? now.w / ref.w : 1;
+    const sy = (ref && ref.h && now) ? now.h / ref.h : 1;
+    (byPage[pno] = byPage[pno] || []).push({
+      uid: it.uid, sigId: it.sigId, rot: it.rot,
+      x: it.x * sx, y: it.y * sy, w: it.w * sx, h: it.h * sy,
+    });
+  });
+
+  for (const pnoStr of Object.keys(byPage)) {
+    const pno = parseInt(pnoStr, 10);
+    const page = await docEntry.pdf.getPage(pno);
+    const vp = page.getViewport({scale});
+    const base = document.createElement('canvas');
+    base.width = Math.floor(vp.width); base.height = Math.floor(vp.height);
+    await page.render({canvasContext: base.getContext('2d'), viewport: vp}).promise;
+
+    const pdfPage = pages[pno - 1];
+    const pageH = pdfPage.getHeight();
+
+    // 按放置顺序逐张处理：后盖的章要能看到先前已盖的内容（红章压签名时签名才不会消失）
+    const baseCtx = base.getContext('2d');
+    for (const it of byPage[pno]) {
+      const sig = S.sigs.find(s => s.id === it.sigId);
+      if (!sig) continue;
+
+      // 旋转：章绕自身中心转，外接矩形变大，中心点不变
+      const rot = Number(it.rot) || 0;
+      const rad = rot * Math.PI / 180;
+      const bwPt = Math.abs(it.w * Math.cos(rad)) + Math.abs(it.h * Math.sin(rad));
+      const bhPt = Math.abs(it.w * Math.sin(rad)) + Math.abs(it.h * Math.cos(rad));
+      const bx = it.x + it.w / 2 - bwPt / 2;
+      const by = it.y + it.h / 2 - bhPt / 2;
+      const px = Math.round(bx * scale), py = Math.round(by * scale);
+      const pw = Math.max(1, Math.round(it.w * scale)), ph = Math.max(1, Math.round(it.h * scale));
+      const bw = Math.max(1, Math.round(bwPt * scale)), bh = Math.max(1, Math.round(bhPt * scale));
+
+      // 把章按 -rot（画布顺时针为正）画进独立画布，四角保持透明
+      const solo = document.createElement('canvas');
+      solo.width = bw; solo.height = bh;
+      const sc = solo.getContext('2d');
+      sc.translate(bw / 2, bh / 2);
+      sc.rotate(-rad);
+      sc.drawImage(sig.img, -pw / 2, -ph / 2, pw, ph);
+
+      if (!sig.isSeal) {
+        // 普通签名章：直接叠到工作画布，并嵌入旋转后的透明 PNG
+        baseCtx.drawImage(solo, px, py);
+        const blob = await new Promise(r => solo.toBlob(r, 'image/png'));
+        const png = await doc.embedPng(new Uint8Array(await blob.arrayBuffer()));
+        pdfPage.drawImage(png, {x: bx, y: pageH - by - bhPt, width: bwPt, height: bhPt});
+        continue;
+      }
+
+      // 红章：与"当前工作画布（已含先前贴的签名/文字）"做正片叠底
+      const off = document.createElement('canvas');
+      off.width = bw; off.height = bh;
+      const c = off.getContext('2d');
+      c.drawImage(base, px, py, bw, bh, 0, 0, bw, bh);   // 1) 底图（含之前的章）
+      c.globalCompositeOperation = 'multiply';
+      c.drawImage(solo, 0, 0);                            // 2) 正片叠底
+      c.globalCompositeOperation = 'destination-in';
+      c.drawImage(solo, 0, 0);                            // 3) 章的 alpha 做遮罩
+      c.globalCompositeOperation = 'source-over';
+      // 把结果写回工作画布，供后续章使用
+      baseCtx.drawImage(off, px, py);
+      const pngBuf = await new Promise(r => off.toBlob(r, 'image/png'));
+      const png = await doc.embedPng(new Uint8Array(await pngBuf.arrayBuffer()));
+      pdfPage.drawImage(png, {x: bx, y: pageH - by - bhPt, width: bwPt, height: bhPt});
+    }
+  }
+  return await doc.save();
+}
+
+/* 极简 ZIP 打包（store 不压缩）——批量导出成一个 zip，免去连续下载被浏览器拦截 */
+function crc32(u8) {
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < u8.length; i++) {
+    crc ^= u8[i];
+    for (let k = 0; k < 8; k++) crc = (crc >>> 1) ^ (0xEDB88320 & -(crc & 1));
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function makeZip(files) {
+  const enc = new TextEncoder();
+  const now = new Date();
+  const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+  const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+  const locals = [], centrals = [];
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const data = f.data;
+    const crc = crc32(data), n = data.length;
+    const lh = new Uint8Array(30 + name.length);
+    const dv = new DataView(lh.buffer);
+    dv.setUint32(0, 0x04034b50, true); dv.setUint16(4, 20, true); dv.setUint16(6, 0x0800, true);
+    dv.setUint16(8, 0, true); dv.setUint16(10, dosTime, true); dv.setUint16(12, dosDate, true);
+    dv.setUint32(14, crc, true); dv.setUint32(18, n, true); dv.setUint32(22, n, true);
+    dv.setUint16(26, name.length, true); dv.setUint16(28, 0, true);
+    lh.set(name, 30);
+    locals.push(lh, data);
+    const ch = new Uint8Array(46 + name.length);
+    const cd = new DataView(ch.buffer);
+    cd.setUint32(0, 0x02014b50, true); cd.setUint16(4, 20, true); cd.setUint16(6, 20, true);
+    cd.setUint16(8, 0x0800, true); cd.setUint16(10, 0, true);
+    cd.setUint16(12, dosTime, true); cd.setUint16(14, dosDate, true);
+    cd.setUint32(16, crc, true); cd.setUint32(20, n, true); cd.setUint32(24, n, true);
+    cd.setUint16(28, name.length, true); cd.setUint32(42, offset, true);
+    ch.set(name, 46);
+    centrals.push(ch);
+    offset += lh.length + n;
+  }
+  const cdSize = centrals.reduce((a, b) => a + b.length, 0);
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cdSize, true); ev.setUint32(16, offset, true);
+  const out = new Uint8Array(offset + cdSize + 22);
+  let p = 0;
+  for (const x of locals) { out.set(x, p); p += x.length; }
+  for (const x of centrals) { out.set(x, p); p += x.length; }
+  out.set(eocd, p);
+  return out;
+}
+
+function saveBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+}
+
 $('#btnExport').onclick = async () => {
   if (!S.pdfBytes) return;
   if (!S.items.length) { toast('还没有放置任何签名', true); return; }
   const btn = $('#btnExport');
   btn.disabled = true;
-  $('#status').textContent = '正在生成 PDF …';
+  const batch = S.docs.length > 1;
+  const master = S.docs[S.masterIdx];
+  const ref = master ? master.sizes : (S.docs[0] ? S.docs[0].sizes : []);
+  $('#status').textContent = batch ? `正在给 ${S.docs.length} 份 PDF 盖章 …` : '正在生成 PDF …';
   try {
-    const {PDFDocument, degrees} = PDFLib;
-    const doc = await PDFDocument.load(S.pdfBytes);
-    const pages = doc.getPages();
-    const byPage = {};
-    S.items.forEach(it => { (byPage[it.page] = byPage[it.page] || []).push(it); });
-
-    for (const pnoStr of Object.keys(byPage)) {
-      const pno = parseInt(pnoStr, 10);
-      const page = await S.pdf.getPage(pno);
-      const scale = EXPORT_DPI / 72;
-      const vp = page.getViewport({scale});
-      const base = document.createElement('canvas');
-      base.width = Math.floor(vp.width); base.height = Math.floor(vp.height);
-      await page.render({canvasContext: base.getContext('2d'), viewport: vp}).promise;
-
-      const pdfPage = pages[pno - 1];
-      const pageH = pdfPage.getHeight();
-
-      // 按放置顺序逐张处理：后盖的章要能看到先前已盖的内容（红章压签名时签名才不会消失）
-      const baseCtx = base.getContext('2d');
-      for (const it of byPage[pno]) {
-        const sig = S.sigs.find(s => s.id === it.sigId);
-        if (!sig) continue;
-        const px = Math.round(it.x * scale), py = Math.round(it.y * scale);
-        const pw = Math.max(1, Math.round(it.w * scale)), ph = Math.max(1, Math.round(it.h * scale));
-
-        if (!sig.isSeal) {
-          // 普通签名章：直接叠到工作画布，并原图透明嵌入
-          baseCtx.drawImage(sig.img, px, py, pw, ph);
-          const png = await doc.embedPng(dataUrlToBytes(sig.dataUrl));
-          pdfPage.drawImage(png, {x: it.x, y: pageH - it.y - it.h, width: it.w, height: it.h});
-          continue;
+    if (!batch) {
+      const out = await buildStamped(master || S.docs[0], S.items, ref);
+      const name = (S.docName || 'doc').replace(/\.pdf$/i, '') + '_已签章.pdf';
+      saveBlob(new Blob([out], {type: 'application/pdf'}), name);
+      $('#status').textContent = '已导出 ' + name;
+      toast('导出成功：' + name);
+    } else {
+      const enc = new TextEncoder();
+      const files = [];
+      const report = [];
+      for (let i = 0; i < S.docs.length; i++) {
+        const d = S.docs[i];
+        $('#status').textContent = `正在盖章 ${i + 1}/${S.docs.length}：${d.name} …`;
+        try {
+          const out = await buildStamped(d, S.items, ref);
+          const stem = d.name.replace(/\.pdf$/i, '');
+          files.push({name: stem + '_已签章.pdf', data: new Uint8Array(out)});
+          const skipped = S.items.filter(it => it.page > d.npages).length;
+          report.push(`OK   ${d.name}${skipped ? '   （' + skipped + ' 处章因页数不足跳过）' : ''}`);
+        } catch (err) {
+          console.error(err);
+          report.push(`FAIL ${d.name}   ${err && err.message || err}`);
         }
-
-        // 红章：与"当前工作画布（已含先前贴的签名/文字）"做正片叠底
-        const off = document.createElement('canvas');
-        off.width = pw; off.height = ph;
-        const c = off.getContext('2d');
-        c.drawImage(base, px, py, pw, ph, 0, 0, pw, ph);   // 1) 底图（含之前的章）
-        c.globalCompositeOperation = 'multiply';
-        c.drawImage(sig.img, 0, 0, pw, ph);                 // 2) 正片叠底
-        c.globalCompositeOperation = 'destination-in';
-        c.drawImage(sig.img, 0, 0, pw, ph);                 // 3) 章的 alpha 做遮罩
-        c.globalCompositeOperation = 'source-over';
-        // 把结果写回工作画布，供后续章使用
-        baseCtx.drawImage(off, px, py);
-        const pngBuf = await new Promise(r => off.toBlob(r, 'image/png'));
-        const png = await doc.embedPng(new Uint8Array(await pngBuf.arrayBuffer()));
-        pdfPage.drawImage(png, {x: it.x, y: pageH - it.y - it.h, width: it.w, height: it.h});
       }
+      if (!files.length) throw new Error('全部文件都未能盖章：' + report.join('；'));
+      files.push({name: '_批量盖章结果.txt', data: enc.encode(report.join('\n') + '\n')});
+      const zip = makeZip(files);
+      const zname = 'SignStudio_批量签章_' + (() => {
+        const t = new Date(), p = n => String(n).padStart(2, '0');
+        return `${t.getFullYear()}${p(t.getMonth() + 1)}${p(t.getDate())}_${p(t.getHours())}${p(t.getMinutes())}`;
+      })() + '.zip';
+      saveBlob(new Blob([zip], {type: 'application/zip'}), zname);
+      const okN = files.length - 1 - report.filter(r => r.startsWith('FAIL')).length;
+      $('#status').textContent = `批量导出完成：${okN}/${S.docs.length} 份 → ${zname}`;
+      toast(`批量导出完成：${okN}/${S.docs.length} 份成功 → ${zname}`);
     }
-    const out = await doc.save();
-    const name = (S.docName || 'doc').replace(/\.pdf$/i, '') + '_已签章.pdf';
-    const blob = new Blob([out], {type: 'application/pdf'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    $('#status').textContent = '已导出 ' + name;
-    toast('导出成功：' + name);
   } catch (err) {
     console.error(err);
     toast('导出失败：' + (err && err.message || err), true);
@@ -688,7 +1050,8 @@ $('#btnSaveProj').onclick = async () => {
   }).filter(Boolean);
   const key2key = {};
   sigs.forEach(s => { key2key[s.key] = s.key; });
-  const items = S.items.map(it => ({page: it.page, x: it.x, y: it.y, w: it.w, h: it.h, sig: it.sigId}));
+  const items = S.items.map(it => ({page: it.page, x: it.x, y: it.y, w: it.w, h: it.h,
+                                    sig: it.sigId, rot: it.rot || 0}));
   const all = loadProjects();
   all[name] = {name, saved_at: new Date().toLocaleString('zh-CN'), sigs, items,
                ref_pages: [{w_pt: S.ptW, h_pt: S.ptH}]};
@@ -698,6 +1061,20 @@ $('#btnSaveProj').onclick = async () => {
   } catch (e) {
     toast('保存失败（浏览器本地空间不足，可减少签名图片体积）：' + e.message, true);
   }
+};
+
+/* 把 localStorage 里的工程导出成 JSON 文件，完整版可点「导入工程」直接吃 */
+$('#btnExportProj').onclick = () => {
+  const all = loadProjects();
+  const names = Object.keys(all);
+  if (!names.length) { toast('还没有保存过工程', true); return; }
+  const blob = new Blob([JSON.stringify(all)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'SignStudio零安装版工程.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast(`已导出 ${names.length} 个工程，可在完整版点「导入工程」选择这个文件`);
 };
 
 $('#btnLoadProj').onclick = async () => {
@@ -754,14 +1131,84 @@ $('#btnLoadProj').onclick = async () => {
     const sid = idMap[it.sig];
     if (!sid) continue;
     items.push({uid: uid(), page: it.page, x: it.x * sx, y: it.y * sy,
-                w: it.w * sx, h: it.h * sy, sigId: sid});
+                w: it.w * sx, h: it.h * sy, sigId: sid, rot: it.rot || 0});
   }
   S.items = items; S.activeItem = null;
   renderSigs(); renderItems(); renderItemList();
   toast(`已套用工程「${pick}」：${items.length} 处` + (skipped ? `（${skipped} 处因页数不足跳过）` : ''));
 };
 
-window.addEventListener('resize', () => { if (S.pdf) fitWidth(); });
+/* ---------- 版本 / 检查更新 ----------
+   零安装版是本地 file:// 页面，浏览器不允许网页改写自己所在的文件，
+   所以这里只能“发现新版本 → 给出新版压缩包下载链接”，由用户解压覆盖。 */
+const APP_VERSION = '1.5.2';
+const UPDATE_JS = 'https://example.com/download/signstudio/version.js';
+const LAN_UPDATE_JS = 'http://nas.local/download/signstudio/version.js';
+
+function vtuple(t){
+  const p = String(t || '').replace(/^v/i, '').split('.');
+  const out = [];
+  for (const seg of p) { const m = String(seg).match(/^\d+/); out.push(m ? parseInt(m[0], 10) : 0); }
+  while (out.length < 3) out.push(0);
+  return out.slice(0, 3);
+}
+function isNewer(a, b){
+  const x = vtuple(a), y = vtuple(b);
+  for (let i = 0; i < 3; i++) { if (x[i] > y[i]) return true; if (x[i] < y[i]) return false; }
+  return false;
+}
+function verChip(txt, hasNew){
+  const el = $('#verChip');
+  el.textContent = txt;
+  el.classList.toggle('hasnew', !!hasNew);
+}
+verChip('v' + APP_VERSION, false);
+
+function loadManifestScript(url){
+  return new Promise(resolve => {
+    let done = false;
+    const s = document.createElement('script');
+    const finish = () => { if (!done) { done = true; resolve(!!window.SIGNSTUDIO_LATEST); } };
+    s.src = url + '?t=' + Date.now();
+    s.onload = finish;
+    s.onerror = finish;
+    document.head.appendChild(s);
+    setTimeout(finish, 6000);
+  });
+}
+
+async function checkUpdate(manual){
+  if (manual) verChip('检查中…', false);
+  let ok = await loadManifestScript(UPDATE_JS);
+  if (!ok) ok = await loadManifestScript(LAN_UPDATE_JS);
+  const m = window.SIGNSTUDIO_LATEST || null;
+  verChip('v' + APP_VERSION, false);
+  if (!m || !m.version) {
+    if (manual) toast('检查更新失败：连不上更新服务器（离线也能正常用）', true);
+    return;
+  }
+  if (!isNewer(m.version, APP_VERSION)) {
+    if (manual) toast('已是最新版本 v' + APP_VERSION);
+    return;
+  }
+  verChip('v' + APP_VERSION, true);
+  const bar = $('#updbar');
+  const dl = m.webapp_url || (m.url_base ? m.url_base + '/' + m.webapp : '');
+  bar.innerHTML =
+    '<b>发现新版本 v' + m.version + '</b> <span class="meta">（当前 v' + APP_VERSION + '）</span>' +
+    (m.notes ? '<div class="notes">' + String(m.notes).replace(/[<>]/g, '') + '</div>' : '') +
+    '<div class="meta" style="margin-top:4px"><b>一键更新</b>：双击本软件文件夹里的 <b>UPDATE.bat</b>，' +
+    '它会自动下载、校验并覆盖本文件夹（会先把旧 HTML 备份成 .backup_日期），完事重新打开 签章工作台.html 即可。' +
+    (dl ? ' 也可以手动 <a href="' + dl + '">下载新版零安装包</a> 后解压覆盖。' : '') +
+    '<br>签名图和工程模板存在浏览器里，不会丢。</div>';
+  bar.style.display = 'block';
+  toast('发现新版本 v' + m.version);
+}
+
+$('#verChip').addEventListener('click', () => checkUpdate(true));
+setTimeout(() => checkUpdate(false), 1200);
+
+window.addEventListener('resize', () => { if (S.pdf) refit(); });
 
 /* 启动提示 */
 if (location.protocol === 'file:' && !/pdf\.min\.js/.test(document.scripts[0].src)) {

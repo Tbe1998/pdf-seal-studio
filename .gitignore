@@ -3,6 +3,15 @@ out/
 *.pdf
 !examples/*.pdf
 .studio_tmp/
+dist/
+.batch_test/
+.update_backup/
+update.log
+in/
+
+# 局域网共享库与工程模板（运行时生成，含真实签名）
+shared/
+projects/
 __pycache__/
 *.pyc
 *.pyo
