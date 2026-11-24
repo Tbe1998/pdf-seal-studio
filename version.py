@@ -6,7 +6,7 @@
 不要在别处硬编码版本号、镜像目录或更新地址。
 """
 
-VERSION = "1.7.1"                 # ← 唯一版本号
+VERSION = "1.7.2"                 # ← 唯一版本号
 APP_TITLE = "SignStudio"
 APP_TITLE_CN = "签章工作台"
 
@@ -17,8 +17,8 @@ UPDATE_MANUAL = False
 
 # NAS 镜像目录（/volume1/web/download/<MIRROR_SUBDIR>/）
 MIRROR_SUBDIR = "signstudio"
-NAS_HOST = "nas.local"        # 自建更新镜像（示例占位，按需改成自己的地址）
-PUBLIC_HOST = "example.com"   # 公网更新镜像（示例占位）
+NAS_HOST = "192.168.1.6"
+PUBLIC_HOST = "www.topbei.cn"
 
 LAN_BASE = "http://%s/download/%s" % (NAS_HOST, MIRROR_SUBDIR)
 PUBLIC_BASE = "https://%s/download/%s" % (PUBLIC_HOST, MIRROR_SUBDIR)

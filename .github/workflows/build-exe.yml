@@ -36,6 +36,10 @@ jobs:
         run: |
           python -c "import signstudio, desktop, version; print('version', version.VERSION)"
 
+      - name: Check update sources are real
+        run: |
+          python -c "import version; m=version.DEFAULT_MANIFESTS; print('\n'.join(m)); assert not any('example.com' in u or 'nas.local' in u for u in m), '更新源仍是占位地址，exe 会连不上'"
+
       - name: Build exe (windowed, embedded studio.html + assets)
         run: |
           pyinstaller --noconfirm --clean --onefile --windowed `
