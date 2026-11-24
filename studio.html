@@ -487,10 +487,22 @@ async function loadPage(p){
   state.page = Math.min(Math.max(1, p), state.npages);
   $('#pageNo').value = state.page;
   const img = $('#pageImg');
-  await new Promise(res => {
-    img.onload = res; img.onerror = res;
-    img.src = `/api/page/${state.docId}/${state.page}?dpi=${RENDER_DPI}&t=${Date.now()}`;
-  });
+  const src = `/api/page/${state.docId}/${state.page}?dpi=${RENDER_DPI}&t=${Date.now()}`;
+  const wait = () => new Promise(res => { img.onload = res; img.onerror = res; img.src = src; });
+  await wait();
+  if(!img.naturalWidth){
+    // 第一次失败可能赶在服务重启/磁盘重载的瞬间，稍等再试一次
+    await new Promise(r => setTimeout(r, 700));
+    await wait();
+  }
+  if(!img.naturalWidth){
+    $('#status').textContent = '第 ' + state.page + ' 页加载失败';
+    banner('<b>这一页显示不出来</b>：本地服务里找不到这份 PDF（服务重启或临时文件被清理）。\n' +
+           '请点左上角「打开 PDF」重新导入这个文件；已放置的章不受影响，导入后按工程/原位置继续即可。');
+    toast('PDF 页面加载失败，请重新导入该文件', true);
+    return;
+  }
+  hideBanner();
   state.pageNatural = {w: img.naturalWidth, h: img.naturalHeight};
   if(state.fitMode === 'manual') applyZoom(); else refit();
   renderItems();

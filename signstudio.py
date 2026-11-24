@@ -152,13 +152,79 @@ def _page_cache_stats() -> dict:
         return {"items": len(_PAGE_CACHE), "bytes": _PAGE_CACHE_BYTES}
 
 
-def _doc_put(doc_id: str, doc: dict):
-    """登记打开的 PDF，并按 LRU 淘汰旧文档（连同它的页面缓存一起清掉）。"""
+DOC_DIR = os.path.join(TMP, "docs")     # 导入过的 PDF 落盘，重启/被淘汰后还能按 doc_id 找回
+
+
+def _doc_file(doc_id: str) -> str:
+    return os.path.join(DOC_DIR, doc_id + ".pdf")
+
+
+def _doc_put(doc_id: str, doc: dict, persist: bool = True):
+    """登记打开的 PDF，并按 LRU 淘汰内存里的旧文档（磁盘副本保留，按需重载）。"""
     DOCS[doc_id] = doc
     DOCS.move_to_end(doc_id)
+    if persist:
+        try:
+            os.makedirs(DOC_DIR, exist_ok=True)
+            p = _doc_file(doc_id)
+            if not os.path.exists(p) or os.path.getsize(p) != len(doc["bytes"]):
+                with open(p, "wb") as f:
+                    f.write(doc["bytes"])
+        except Exception as e:                                 # noqa: BLE001
+            print("  ！保存 PDF 副本失败（不影响本次使用）：%s" % e)
     while len(DOCS) > MAX_DOCS:
         old_id, _ = DOCS.popitem(last=False)
         _page_cache_clear(old_id)
+
+
+def _doc_get(doc_id: str):
+    """取文档：内存里没有就从磁盘副本重载（服务重启、内存淘汰后页面仍能显示）。"""
+    d = DOCS.get(doc_id)
+    if d is not None:
+        DOCS.move_to_end(doc_id)
+        return d
+    p = _doc_file(doc_id)
+    if not os.path.exists(p):
+        return None
+    with open(p, "rb") as f:
+        data = f.read()
+    n, pages = _pdf_info(data)
+    d = {"bytes": data, "name": os.path.basename(p), "pages": pages, "npages": n}
+    _doc_put(doc_id, d, persist=False)
+    return d
+
+
+def _doc_gc(days: int = 7, max_bytes: int = 2 * 1024 ** 3):
+    """清掉很久以前的 PDF 副本，并把总量压到 max_bytes 以内（先删最旧的）。"""
+    try:
+        if not os.path.isdir(DOC_DIR):
+            return
+        cutoff = time.time() - days * 86400
+        files = []
+        for fn in os.listdir(DOC_DIR):
+            p = os.path.join(DOC_DIR, fn)
+            try:
+                st = os.stat(p)
+            except OSError:
+                continue
+            if st.st_mtime < cutoff:
+                try:
+                    os.remove(p)
+                    continue
+                except OSError:
+                    pass
+            files.append((st.st_mtime, st.st_size, p))
+        total = sum(sz for _, sz, _ in files)
+        for _, sz, p in sorted(files):
+            if total <= max_bytes:
+                break
+            try:
+                os.remove(p)
+                total -= sz
+            except OSError:
+                pass
+    except Exception:                                          # noqa: BLE001
+        pass
 
 
 def _page_png(doc_id: str, page: int, dpi: int) -> bytes:
@@ -167,7 +233,9 @@ def _page_png(doc_id: str, page: int, dpi: int) -> bytes:
     if hit is not None:
         return hit
     pymupdf = ms.get_fitz()
-    d = DOCS[doc_id]
+    d = _doc_get(doc_id)
+    if d is None:
+        raise KeyError(doc_id)
     doc = pymupdf.open(stream=d["bytes"], filetype="pdf")
     try:
         pix = doc[page - 1].get_pixmap(dpi=dpi, alpha=False)
@@ -392,7 +460,7 @@ def _build_pdf_items(doc_id: str, src_pages: list, items: list, keep: bool):
     这样同一套位置可以直接套到版式相近的另一份 PDF 上。
     返回 (pdf_items, missing, skipped)；missing=签名失效，skipped=页码超出目标文档。
     """
-    pages = DOCS[doc_id]["pages"]
+    pages = _doc_get(doc_id)["pages"]
     pdf_items = []
     missing = []
     skipped = []
@@ -454,11 +522,14 @@ def _export(payload: dict) -> tuple[bytes, str]:
     doc_id = payload["doc_id"]
     items = payload.get("items") or []
     keep = payload.get("keep_ratio", True)
-    base = DOCS[doc_id]["bytes"]
+    d = _doc_get(doc_id)
+    if d is None:
+        raise ValueError("文档已失效（服务重启后临时文件被清理），请重新导入 PDF")
+    base = d["bytes"]
     name = payload.get("filename") or "已签章.pdf"
 
     pdf_items, missing, skipped = _build_pdf_items(
-        doc_id, payload.get("ref_pages") or DOCS[doc_id]["pages"], items, keep)
+        doc_id, payload.get("ref_pages") or d["pages"], items, keep)
 
     if missing:
         raise ValueError("有 %d 个签名已失效（服务重启后签名缓存会清空），"
@@ -494,8 +565,9 @@ def _export_batch(payload: dict) -> tuple[bytes, str, list]:
     """
     import zipfile
     master_id = payload.get("master_id") or payload.get("doc_id")
-    if master_id not in DOCS:
-        raise ValueError("基准文档不存在（服务可能已重启），请重新导入 PDF")
+    md = _doc_get(master_id) if master_id else None
+    if md is None:
+        raise ValueError("基准文档不存在（临时文件已被清理），请重新导入 PDF")
     docs = payload.get("docs") or []
     if not docs:
         raise ValueError("没有要盖章的 PDF")
@@ -503,7 +575,7 @@ def _export_batch(payload: dict) -> tuple[bytes, str, list]:
     if not items:
         raise ValueError("还没有放置任何签名")
     keep = payload.get("keep_ratio", True)
-    src_pages = payload.get("ref_pages") or DOCS[master_id]["pages"]
+    src_pages = payload.get("ref_pages") or md["pages"]
     font = ms.pick_font(None)
 
     buf = io.BytesIO()
@@ -513,7 +585,8 @@ def _export_batch(payload: dict) -> tuple[bytes, str, list]:
         for d in docs:
             did = d.get("doc_id")
             fname = d.get("filename") or "doc.pdf"
-            if did not in DOCS:
+            dd = _doc_get(did) if did else None
+            if dd is None:
                 report.append({"file": fname, "ok": False, "error": "文档已失效，请重新导入"})
                 continue
             try:
@@ -521,8 +594,8 @@ def _export_batch(payload: dict) -> tuple[bytes, str, list]:
                 if missing:
                     raise ValueError("有 %d 个签名已失效，请重新导入签名图片" % len(missing))
                 if not pdf_items:
-                    raise ValueError("所有章都超出该文档页数（共 %d 页）" % len(DOCS[did]["pages"]))
-                out = ms.stamp_visual_batch(DOCS[did]["bytes"], pdf_items, font)
+                    raise ValueError("所有章都超出该文档页数（共 %d 页）" % len(dd["pages"]))
+                out = ms.stamp_visual_batch(dd["bytes"], pdf_items, font)
             except Exception as e:                      # noqa: BLE001
                 report.append({"file": fname, "ok": False, "error": str(e)})
                 continue
@@ -535,7 +608,7 @@ def _export_batch(payload: dict) -> tuple[bytes, str, list]:
             used.add(arc)
             zf.writestr(arc, out)
             report.append({"file": fname, "ok": True, "out": arc,
-                           "skipped": len(skipped), "pages": len(DOCS[did]["pages"])})
+                           "skipped": len(skipped), "pages": len(dd["pages"])})
 
     ok_n = sum(1 for r in report if r.get("ok"))
     if not ok_n:
@@ -910,11 +983,23 @@ class Handler(BaseHTTPRequestHandler):
 
             if u.path.startswith("/api/page/"):
                 parts = [x for x in u.path.split("/") if x]
+                if len(parts) < 4:
+                    return self._json({"error": "地址格式应为 /api/page/<文档id>/<页码>"}, 404)
                 doc_id, page = parts[2], parts[3]
                 dpi = int(q.get("dpi", ["110"])[0])
-                if doc_id not in DOCS:
-                    return self._json({"error": "文档不存在"}, 404)
-                return self._send(200, _page_png(doc_id, int(page), dpi), "image/png")
+                d = _doc_get(doc_id)
+                if d is None:
+                    return self._json({"error": "文档不存在（临时文件已被清理，请重新导入 PDF）",
+                                       "doc_id": doc_id}, 404)
+                try:
+                    pno = int(page)
+                except ValueError:
+                    return self._json({"error": "页码不是数字：%s" % page}, 404)
+                npages = len(d["pages"])
+                if pno < 1 or pno > npages:
+                    return self._json({"error": "页码不存在：第 %d 页（该文档共 %d 页）" % (pno, npages),
+                                       "page": pno, "pages": npages}, 404)
+                return self._send(200, _page_png(doc_id, pno, dpi), "image/png")
 
             if u.path.startswith("/api/sig/"):
                 sid = u.path.split("/")[-1]
@@ -984,9 +1069,11 @@ class Handler(BaseHTTPRequestHandler):
             payload = self._read_json()
 
             if u.path == "/api/open_pdf":
+                import hashlib
                 data = base64.b64decode(payload["data"])
                 n, pages = _pdf_info(data)
-                did = uuid.uuid4().hex[:12]
+                # 用内容哈希做 doc_id：同一份 PDF 反复导入只存一份，服务重启后 id 也不变
+                did = hashlib.sha1(data).hexdigest()[:16]
                 _doc_put(did, {"bytes": data, "name": payload.get("filename", "doc.pdf"),
                                "pages": pages, "npages": n})
                 return self._json({"doc_id": did, "npages": n, "pages": pages,
@@ -1095,6 +1182,8 @@ def main():
         shutil.rmtree(TMP, ignore_errors=True)
     os.makedirs(PROJ, exist_ok=True)
     os.makedirs(SEAL_DIR, exist_ok=True)
+    os.makedirs(DOC_DIR, exist_ok=True)
+    _doc_gc(7)
     n_shared = _lib_load()
     n_seed = _lib_seed_from_assets()
     n_shared += n_seed
