@@ -24,6 +24,7 @@ import math
 import mimetypes
 import os
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -75,6 +76,7 @@ LIB: dict[str, dict] = {}    # sig_id -> {name, file, added_at, hash}
 HOST = "0.0.0.0"             # 默认监听所有网卡，局域网内其他电脑可直接访问
 
 SERVER_PORT = 0              # 实际监听端口（更新后要用同一个端口重启）
+SERVER = None                # 当前 HTTP server（自更新时先关掉再拉起新进程）
 
 # 更新状态（后台线程写，接口读）：phase ∈ idle/checking/available/downloading/
 # installing/restarting/uptodate/error；progress 0~100
@@ -933,12 +935,22 @@ def update_apply_async(port: int = 0):
             exe_path = up.fetch_exe(full, progress=_progress)
             _upd(phase="installing", progress=100,
                  message="校验通过，正在替换 exe 并重启…")
-            up.install_exe(exe_path, target=sys.executable,
-                           port=port or SERVER_PORT, restart=True,
-                           extra_args=(["--local-only"] if HOST == "127.0.0.1" else []))
+            real_port = port or SERVER_PORT
+            up.install_exe(exe_path, target=sys.executable, restart=False)
+            # 先放掉端口再拉起新进程，否则新实例会因为 8765 还被占着而换端口
+            try:
+                SERVER.shutdown()
+                SERVER.server_close()
+            except Exception:                                  # noqa: BLE001
+                pass
+            time.sleep(0.4)
+            args = [sys.executable, "--port", str(real_port)]
+            if HOST == "127.0.0.1":
+                args.append("--local-only")
+            subprocess.Popen(args, cwd=os.path.dirname(sys.executable), close_fds=True)
             _upd(phase="restarting", applied=full["version"],
                  message="更新完成，正在重启…（页面会自动刷新）")
-            time.sleep(1.2)
+            time.sleep(0.8)
             up.ulog("exe 版主进程退出，新版本已拉起")
             os._exit(0)
         zip_path = up.fetch_package(full, progress=_progress)
@@ -1234,7 +1246,7 @@ def bootstrap(host: str = "0.0.0.0", port_pref: int = 8765,
               reset_tmp: bool = False, local_only: bool = False):
     """初始化数据目录 / 共享签名库并起 HTTP 服务（不阻塞）。
     返回 (server, port, n_shared)；命令行与 exe 桌面窗口共用这一套。"""
-    global SERVER_PORT, HOST
+    global SERVER_PORT, HOST, SERVER
     if reset_tmp and os.path.isdir(TMP):
         import shutil
         shutil.rmtree(TMP, ignore_errors=True)
@@ -1248,6 +1260,7 @@ def bootstrap(host: str = "0.0.0.0", port_pref: int = 8765,
     port = _free_port(port_pref)
     SERVER_PORT = port
     srv = ThreadingHTTPServer((HOST, port), Handler)
+    SERVER = srv
     return srv, port, n_shared
 
 
