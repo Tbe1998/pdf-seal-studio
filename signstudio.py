@@ -927,6 +927,20 @@ def update_apply_async(port: int = 0):
         if not full["has_update"]:
             _upd(phase="uptodate", progress=0, message="已是最新版本", info=None)
             return
+        if FROZEN:
+            if not full.get("exe_url"):
+                raise up.UpdateError("更新清单里没有 exe 下载地址，请到下载页手动下载新版 exe")
+            exe_path = up.fetch_exe(full, progress=_progress)
+            _upd(phase="installing", progress=100,
+                 message="校验通过，正在替换 exe 并重启…")
+            up.install_exe(exe_path, target=sys.executable,
+                           port=port or SERVER_PORT, restart=True,
+                           extra_args=(["--local-only"] if HOST == "127.0.0.1" else []))
+            _upd(phase="restarting", applied=full["version"],
+                 message="更新完成，正在重启…（页面会自动刷新）")
+            time.sleep(1.2)
+            up.ulog("exe 版主进程退出，新版本已拉起")
+            os._exit(0)
         zip_path = up.fetch_package(full, progress=_progress)
         _upd(phase="installing", progress=100,
              message="校验通过，正在安装 v%s…" % full["version"])
@@ -948,6 +962,8 @@ def _version_payload() -> dict:
     st.update({"version": vmod.VERSION,
                "manual": bool(getattr(vmod, "UPDATE_MANUAL", True)),
                "latest_on_server": (st.get("info") or {}).get("version") or "",
+               "frozen": FROZEN,
+               "auto": FROZEN or not bool(getattr(vmod, "UPDATE_MANUAL", True)),
                "manifests": vmod.DEFAULT_MANIFESTS})
     return st
 
@@ -1060,6 +1076,21 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:  # noqa: BLE001
             return self._json({"error": f"{type(e).__name__}: {e}"}, 500)
 
+    def _send_file(self, path, ctype, name):
+        size = os.path.getsize(path)
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(size))
+        self.send_header("Content-Disposition", 'attachment; filename="%s"' % name)
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        with open(path, "rb") as f:
+            while True:
+                chunk = f.read(1 << 20)
+                if not chunk:
+                    break
+                self.wfile.write(chunk)
+
     def _update_download(self):
         """手动更新用：把最新整包下载下来交给浏览器保存，由用户自己解压覆盖。
 
@@ -1067,6 +1098,12 @@ class Handler(BaseHTTPRequestHandler):
         """
         try:
             info = up.check_latest(timeout=10)
+            if FROZEN:
+                if not info.get("exe_url"):
+                    return self._json({"ok": False, "error": "更新清单里没有 exe 地址"}, 500)
+                path = up.fetch_exe(info)
+                return self._send_file(path, "application/octet-stream",
+                                       "SignStudio-v%s.exe" % info.get("version", ""))
             if not info.get("package_url"):
                 return self._json({"ok": False, "error": "更新清单里没有更新包地址"}, 500)
             path = up.fetch_package(info)          # 已下载且 sha256 一致时直接复用
@@ -1120,9 +1157,15 @@ class Handler(BaseHTTPRequestHandler):
 
             if u.path == "/api/update/apply":
                 if FROZEN:
-                    return self._json({"ok": False,
-                                       "error": "这是打包版 exe，不能自我覆盖更新。"
-                                                "请到下载页下载新版 exe 替换旧文件。"})
+                    st = _upd_snapshot()
+                    if st.get("phase") in ("downloading", "installing", "restarting"):
+                        return self._json({"ok": False, "error": "更新正在进行中，请稍候"})
+                    if not st.get("info"):
+                        return self._json({"ok": False, "error": "没有待安装的新版本，请先点『检查更新』"})
+                    threading.Thread(target=update_apply_async, args=(SERVER_PORT,),
+                                     daemon=True).start()
+                    return self._json({"ok": True, "exe": True,
+                                       "message": "开始下载新版 exe，完成后自动替换并重启"})
                 # 手动更新模式：不下载、不覆盖、不重启，交给用户自己替换文件
                 if getattr(vmod, "UPDATE_MANUAL", True):
                     return self._json({"ok": False,

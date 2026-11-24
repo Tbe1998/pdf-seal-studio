@@ -52,7 +52,7 @@ try:
     APP_TITLE = getattr(vmod, "APP_TITLE", "SignStudio")
 except Exception:                                     # 兜底，永不因版本模块报错而无法更新
     CURRENT = "0.0.0"
-    DEFAULT_MANIFESTS = ["https://example.com/download/signstudio/latest.json"]
+    DEFAULT_MANIFESTS = ["https://www.topbei.cn/download/signstudio/latest.json"]
     PUBKEY = ""
     USER_DATA_DIRS = ("projects",)
     APP_TITLE = "SignStudio"
@@ -195,6 +195,11 @@ def _read_manifest(url, timeout=8):
         "webapp_url": _ascii_url(urllib.parse.urljoin(url, data["webapp"])) if data.get("webapp") else "",
         "webapp_size": int(data.get("webapp_size") or 0),
         "webapp_sha256": (data.get("webapp_sha256") or "").strip().lower(),
+        # 打包版 exe 的自更新信息（有就用 exe 通道，没有就退回整包）
+        "exe": data.get("exe") or "",
+        "exe_url": _ascii_url(urllib.parse.urljoin(url, data["exe"])) if data.get("exe") else "",
+        "exe_size": int(data.get("exe_size") or 0),
+        "exe_sha256": (data.get("exe_sha256") or "").strip().lower(),
         "sig_state": sig_state,
         "sig_msg": sig_msg,
         "source": url,
@@ -217,9 +222,9 @@ def check_latest(custom=None, timeout=8):
         info["current"] = CURRENT
         info["has_update"] = is_newer(info["version"])
         info["checked_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        if info["has_update"] and not info["sha256"]:
+        if info["has_update"] and not (info["sha256"] or info["exe_sha256"]):
             info["has_update"] = False
-            info["warning"] = "清单里没有 package_sha256，为安全起见不提示更新"
+            info["warning"] = "清单里没有 package_sha256 / exe_sha256，为安全起见不提示更新"
         return info
     raise UpdateError("所有更新源都连不上：\n" + "\n".join("  · " + x for x in errors))
 
@@ -265,6 +270,77 @@ def download(url, dest, progress=None, timeout=60):
 def staged_zip(ver=""):
     name = "SignStudio-pkg" + (("-v" + str(ver).lstrip("vV")) if ver else "") + ".zip"
     return os.path.join(tempfile.gettempdir(), name)
+
+
+def staged_exe(ver=""):
+    name = "SignStudio-setup" + (("-v" + str(ver).lstrip("vV")) if ver else "") + ".exe"
+    return os.path.join(tempfile.gettempdir(), name)
+
+
+def fetch_exe(info, progress=None):
+    """下载新版 exe 并校验 sha256，返回本地路径。"""
+    url = info.get("exe_url") or ""
+    if not url:
+        raise UpdateError("更新清单里没有 exe 下载地址（可能还没发布 exe 版）")
+    dest = staged_exe(info.get("version"))
+    size, sha = download(url, dest, progress=progress)
+    want = (info.get("exe_sha256") or "").lower()
+    if not want:
+        raise UpdateError("清单没有 exe_sha256，拒绝安装未校验的 exe")
+    if sha != want:
+        try:
+            os.remove(dest)
+        except OSError:
+            pass
+        raise UpdateError("exe sha256 校验不一致（期望 %s…，实际 %s…），已拒绝安装"
+                          % (want[:12], sha[:12]))
+    ulog("exe 下载完成 %d 字节，sha256 校验通过" % size)
+    return dest
+
+
+def install_exe(new_exe, target=None, port=0, restart=True, extra_args=None):
+    """用「改名自己→放新文件→重启」的方式就地替换正在运行的 exe。
+
+    Windows 允许重命名运行中的镜像文件（不能删除/覆盖），所以不需要外部 helper：
+      target -> target.old    （旧 exe 改名，进程继续跑）
+      .SignStudio.new.exe -> target
+      启动新 target，本进程随后退出
+    """
+    target = os.path.abspath(target or sys.executable)
+    if not os.path.exists(target):
+        raise UpdateError("找不到当前程序文件：%s" % target)
+    folder = os.path.dirname(target)
+    staged = os.path.join(folder, ".SignStudio.new.exe")
+    old = target + ".old"
+
+    if os.path.exists(old):
+        try:
+            os.remove(old)
+        except OSError:
+            pass
+    shutil.copy2(new_exe, staged)          # 先落到同目录，避免跨盘 rename 失败
+    if os.path.getsize(staged) != os.path.getsize(new_exe):
+        raise UpdateError("复制新 exe 不完整，已放弃更新")
+
+    try:
+        os.replace(target, old)            # 运行中的 exe 允许改名
+    except OSError as e:
+        raise UpdateError("无法重命名正在运行的 exe（可能被杀毒软件占用）：%s" % e)
+    try:
+        os.replace(staged, target)
+    except Exception as e:                                     # noqa: BLE001
+        try:
+            os.replace(old, target)        # 回滚，别把用户程序搞丢
+        except Exception:                                      # noqa: BLE001
+            pass
+        raise UpdateError("替换 exe 失败，已回滚：%s" % e)
+
+    ulog("exe 已替换：%s（旧文件 %s）" % (target, os.path.basename(old)))
+    if restart:
+        args = [target] + (["--port", str(port)] if port else []) + list(extra_args or [])
+        subprocess.Popen(args, cwd=folder, close_fds=True)
+        ulog("已启动新版本：%s" % " ".join(args))
+    return target
 
 
 def fetch_package(info, progress=None):

@@ -158,8 +158,21 @@ def main():
             control_window(url, lan_urls(args.port))
         return
 
+    # 上次自更新留下的备份，启动后清掉（此时旧 exe 已没有被占用）
+    try:
+        old = sys.executable + ".old"
+        if os.path.exists(old):
+            os.remove(old)
+            logging.info("removed old exe %s", old)
+    except Exception:                                          # noqa: BLE001
+        pass
+
     srv, port, _ = run_server(args.host, args.port, args.local_only)
     url = "http://127.0.0.1:%d/" % port
+
+    # 打包版启动后自动查一次更新，有新版本界面顶部会直接出现「立即更新」
+    threading.Thread(target=ss.update_check, kwargs={"force": False, "timeout": 8},
+                     daemon=True).start()
     urls = lan_urls(port)
 
     try:

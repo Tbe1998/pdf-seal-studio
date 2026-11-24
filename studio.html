@@ -1111,26 +1111,31 @@ function fmtSize(n){ return n ? (n / 1048576).toFixed(1) + ' MB' : ''; }
 
 function renderUpd(st, manual){
   if(!st || !st.version) return;
-  UPD.phase = st.phase; UPD.ver = st.version;
+  UPD.phase = st.phase; UPD.ver = st.version; UPD.frozen = !!st.frozen;
   if(st.info) UPD.info = st.info;
   const bar = $('#updbar');
   if(st.phase === 'available' && st.info){
     const i = st.info;
+    const isExe = !!st.frozen;
+    const sizeTxt = fmtSize(i.exe_size || i.size);
     verChip('v' + st.version, true);
     bar.className = 'show';
     bar.innerHTML =
       '<div class="u"><b>发现新版本 v' + esc(i.version) + '</b>' +
-      '<span class="meta">当前 v' + esc(st.version) + ' · ' + fmtSize(i.size) + ' · ' +
+      '<span class="meta">当前 v' + esc(st.version) + ' · ' + sizeTxt + ' · ' +
         esc(i.published || '') + ' · ' + esc(i.sig_msg || '') + '</span>' +
         (i.notes ? '<div class="notes">' + esc(i.notes) + '</div>' : '') +
-        '<div class="manual">自动更新：点「立即更新」后自动下载 → sha256 校验 → 覆盖程序文件 → ' +
-        '用同一端口自动重启，页面几秒后自动刷新，无需手动拷文件。' +
-        '<br>你的 projects/（工程模板）、assets/seals/（签名图）、jobs/、in/、out/ 不会被覆盖；' +
-        '旧文件备份在 .update_backup/。也可以点「仅下载」自己手动覆盖。' +
+        '<div class="manual">' + (isExe
+          ? '打包版自更新：点「立即更新」→ 下载新版 exe → sha256 校验 → 就地替换当前 exe → 自动重启，页面几秒后刷新。'
+          : '自动更新：点「立即更新」后自动下载 → sha256 校验 → 覆盖程序文件 → 用同一端口自动重启，页面几秒后自动刷新，无需手动拷文件。') +
+        '<br>你的 projects/（工程模板）、shared/（共享签名）、jobs/、in/、out/ 都不会被覆盖；' +
+        (isExe ? '旧 exe 备份为 SignStudio.exe.old，下次启动自动清理。'
+               : '旧文件备份在 .update_backup/。') +
+        '也可以点「仅下载」自己手动替换。' +
         '</div></div>' +
       '<div class="prog"><i></i></div>' +
       '<button class="btn primary" id="updApply">立即更新</button>' +
-      '<button class="btn" id="updDownload">仅下载</button>' +
+      '<button class="btn" id="updDownload">' + (isExe ? '下载 exe' : '仅下载') + '</button>' +
       '<button class="btn" id="updLater">稍后</button>';
     $('#updApply').onclick = applyUpdate;
     $('#updDownload').onclick = downloadUpdatePkg;
@@ -1182,7 +1187,8 @@ async function checkUpdateNow(){
     renderUpd(st, true);
     if(st.phase === 'uptodate') toast('已是最新版本 v' + st.version);
     else if(st.phase === 'error') toast((st.error || '检查更新失败').split('\n')[0], true);
-    else if(st.phase === 'available') toast('发现新版本 v' + (st.info || {}).version + '，点「下载更新包」手动更新');
+    else if(st.phase === 'available') toast('发现新版本 v' + (st.info || {}).version +
+      (st.frozen ? '，点「立即更新」自动替换并重启' : '，点「下载更新包」手动更新'));
   }catch(e){
     toast('检查更新失败：' + e.message, true);
     refreshVersion(true);
@@ -1193,7 +1199,7 @@ async function checkUpdateNow(){
 async function applyUpdate(){
   const info = UPD.info || {};
   if(!confirm('更新到 v' + (info.version || '') + ' ？\n\n' +
-              '更新包约 ' + fmtSize(info.size) + '，程序会自动下载并覆盖程序文件，' +
+              '更新包约 ' + fmtSize(info.exe_size || info.size) + '，程序会自动下载并覆盖程序文件，' +
               '完成后自动重启（页面自动刷新）。\n' +
               '你的签名工程、签名图等数据不会被覆盖。')) return;
   try{
@@ -1208,7 +1214,8 @@ async function applyUpdate(){
 /* 仅下载：不走自动安装，自己解压覆盖（可选路径） */
 function downloadUpdatePkg(){
   const info = UPD.info || {};
-  const name = 'SignStudio-v' + (info.version || '新版本') + '.zip';
+  const isExe = !!UPD.frozen;
+  const name = 'SignStudio-v' + (info.version || '新版本') + (isExe ? '.exe' : '.zip');
   toast('正在下载 ' + name + ' …');
   const a = document.createElement('a');
   a.href = '/api/update/download';
@@ -1216,7 +1223,8 @@ function downloadUpdatePkg(){
   document.body.appendChild(a); a.click(); a.remove();
   localStorage.setItem('ss_manual_update_pending', String(Date.now()));
   localStorage.setItem('ss_manual_update_target', String(info.version || ''));
-  setTimeout(() => toast('下载完成后：解压 → 覆盖到程序文件夹 → 重启工具'), 2600);
+  setTimeout(() => toast(isExe ? '下载完成后：关闭工具 → 用新 exe 替换旧文件 → 重新打开'
+                               : '下载完成后：解压 → 覆盖到程序文件夹 → 重启工具'), 2600);
 }
 
 function startApplyPolling(){
