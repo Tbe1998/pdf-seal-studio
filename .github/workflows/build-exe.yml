@@ -88,6 +88,38 @@ jobs:
           if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
           Write-Host "smoke ok"
 
+      - name: Self-update mechanism test (rename running exe)
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "sstest"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          Copy-Item dist/SignStudio.exe "$dir/t.exe"
+          $p = Start-Process -FilePath "$dir/t.exe" -ArgumentList "--no-window","--port","8897" -PassThru
+          $ok = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            Start-Sleep -Seconds 2
+            try { $h = Invoke-RestMethod "http://127.0.0.1:8897/api/health" -TimeoutSec 3; if ($h.ok) { $ok = $true; break } } catch { }
+          }
+          if (-not $ok) { Stop-Process -Id $p.Id -Force; throw "测试实例没起来" }
+          try {
+            Rename-Item "$dir/t.exe" "t.exe.old" -ErrorAction Stop
+            Write-Host "rename running exe: ok"
+          } catch {
+            Stop-Process -Id $p.Id -Force
+            throw "Windows 不允许改名运行中的 exe，自更新方案需要改回 helper 方案：$_"
+          }
+          Copy-Item dist/SignStudio.exe "$dir/t.exe"
+          Stop-Process -Id $p.Id -Force
+          Start-Sleep -Seconds 2
+          $p2 = Start-Process -FilePath "$dir/t.exe" -ArgumentList "--no-window","--port","8896" -PassThru
+          $ok2 = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            Start-Sleep -Seconds 2
+            try { $h2 = Invoke-RestMethod "http://127.0.0.1:8896/api/health" -TimeoutSec 3; if ($h2.ok) { $ok2 = $true; break } } catch { }
+          }
+          if (-not $p2.HasExited) { Stop-Process -Id $p2.Id -Force }
+          if (-not $ok2) { throw "替换后的 exe 起不来" }
+          Write-Host ("self-update swap ok, version=" + $h2.version)
+
       - name: Package (exe + 使用说明)
         run: |
           New-Item -ItemType Directory -Force -Path pkg | Out-Null
