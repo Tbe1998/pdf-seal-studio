@@ -61,6 +61,29 @@ jobs:
           (Get-FileHash dist/SignStudio.exe -Algorithm SHA256).Hash |
             Out-File -Encoding ascii dist/SignStudio.exe.sha256
 
+      - name: Smoke test (exe 静默启动 + 局域网监听)
+        run: |
+          $p = Start-Process -FilePath "dist/SignStudio.exe" -ArgumentList "--no-window","--port","8899" -PassThru
+          $h = $null
+          for ($i = 0; $i -lt 40; $i++) {
+            Start-Sleep -Seconds 2
+            try {
+              $h = Invoke-RestMethod "http://127.0.0.1:8899/api/health" -TimeoutSec 3
+              if ($h.ok) { break }
+            } catch { }
+          }
+          if (-not $h -or -not $h.ok) {
+            if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+            throw "exe 启动后 /api/health 不通（可能缺少依赖或窗口模式异常）"
+          }
+          Write-Host ("host={0} version={1} lan={2}" -f $h.host, $h.version, ($h.lan -join ","))
+          if ($h.host -ne "0.0.0.0") {
+            Stop-Process -Id $p.Id -Force
+            throw "exe 没有监听 0.0.0.0，局域网无法访问"
+          }
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          Write-Host "smoke ok"
+
       - name: Package (exe + 使用说明)
         run: |
           New-Item -ItemType Directory -Force -Path pkg | Out-Null
@@ -76,7 +99,8 @@ jobs:
           4. 关闭窗口即退出程序。
           "@ | Out-File -Encoding utf8 pkg/使用说明.txt
           Copy-Item dist/SignStudio.exe.sha256 pkg/
-          Compress-Archive -Path pkg/* -DestinationPath "SignStudio-v${{ github.ref_name }}-win64.zip" -Force
+          $tag = "${{ github.ref_name }}"
+          Compress-Archive -Path pkg/* -DestinationPath "SignStudio-win64-$tag.zip" -Force
           Get-ChildItem *.zip, dist/SignStudio.exe | Format-Table Name,Length
 
       - name: Upload artifact
@@ -85,7 +109,7 @@ jobs:
           name: SignStudio-windows
           path: |
             dist/SignStudio.exe
-            SignStudio-v*-win64.zip
+            SignStudio-win64-*.zip
 
       - name: Attach to release
         if: startsWith(github.ref, 'refs/tags/')
@@ -93,6 +117,6 @@ jobs:
         with:
           files: |
             dist/SignStudio.exe
-            SignStudio-v*-win64.zip
+            SignStudio-win64-*.zip
             dist/SignStudio.exe.sha256
           generate_release_notes: true

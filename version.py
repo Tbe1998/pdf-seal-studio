@@ -6,7 +6,7 @@
 不要在别处硬编码版本号、镜像目录或更新地址。
 """
 
-VERSION = "1.6.0"                 # ← 唯一版本号
+VERSION = "1.6.1"                 # ← 唯一版本号
 APP_TITLE = "SignStudio"
 APP_TITLE_CN = "签章工作台"
 
