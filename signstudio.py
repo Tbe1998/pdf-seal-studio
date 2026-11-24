@@ -36,6 +36,27 @@ from urllib.parse import parse_qs, urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+# 打包成 exe 后：只读资源（studio.html 等）在 PyInstaller 的解包目录，
+# 数据（工程/签名/PDF 副本）必须放在 exe 旁边或 LOCALAPPDATA，否则退出即丢。
+FROZEN = bool(getattr(sys, "frozen", False))
+RES_DIR = getattr(sys, "_MEIPASS", HERE)
+
+
+def _pick_data_root() -> str:
+    env = os.environ.get("SIGNSTUDIO_DATA")
+    if env:
+        return os.path.abspath(env)
+    if FROZEN:
+        exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+        if os.access(exe_dir, os.W_OK):
+            return exe_dir
+        base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+        return os.path.join(base, "SignStudio")
+    return HERE
+
+
+DATA_ROOT = _pick_data_root()
+
 import multisign as ms  # 复用已打磨好的贴章/正片叠底/字体逻辑
 import version as vmod  # 版本号唯一来源
 import updater as up    # 自动更新内核
@@ -43,11 +64,11 @@ import updater as up    # 自动更新内核
 DOCS: "OrderedDict[str, dict]" = OrderedDict()   # doc_id -> {bytes, name, pages, npages}
 MAX_DOCS = 40                # 同时在内存里保留的 PDF 数（批量盖章一次要导入多份）
 SIGS: dict[str, dict] = {}   # sig_id -> {path, w, h, name, shared}
-TMP = os.path.join(HERE, ".studio_tmp")
-PROJ = os.path.join(HERE, "projects")
+TMP = os.path.join(DATA_ROOT, ".studio_tmp")
+PROJ = os.path.join(DATA_ROOT, "projects")
 
 # 局域网共享：签名图与工程都落在本机磁盘（shared/seals、projects/），客户端只通过 HTTP 读写
-SHARE = os.path.join(HERE, "shared")
+SHARE = os.path.join(DATA_ROOT, "shared")
 SEAL_DIR = os.path.join(SHARE, "seals")
 SEAL_INDEX = os.path.join(SHARE, "seals.json")
 LIB: dict[str, dict] = {}    # sig_id -> {name, file, added_at, hash}
@@ -323,7 +344,7 @@ def _lib_load():
 
 def _lib_seed_from_assets() -> int:
     """首次启动把程序自带 assets/seals 里的章导入共享库，升级后不用重新导入。"""
-    base = os.path.join(HERE, "assets", "seals")
+    base = os.path.join(RES_DIR, "assets", "seals")
     if not os.path.isdir(base):
         return 0
     n = 0
@@ -975,7 +996,7 @@ class Handler(BaseHTTPRequestHandler):
         q = parse_qs(u.query)
         try:
             if u.path in ("/", "/index.html"):
-                html = os.path.join(HERE, "studio.html")
+                html = os.path.join(RES_DIR, "studio.html")
                 if not os.path.exists(html):
                     return self._send(500, "找不到 studio.html".encode(), "text/plain; charset=utf-8")
                 with open(html, "rb") as f:
@@ -1098,6 +1119,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(_version_payload())
 
             if u.path == "/api/update/apply":
+                if FROZEN:
+                    return self._json({"ok": False,
+                                       "error": "这是打包版 exe，不能自我覆盖更新。"
+                                                "请到下载页下载新版 exe 替换旧文件。"})
                 # 手动更新模式：不下载、不覆盖、不重启，交给用户自己替换文件
                 if getattr(vmod, "UPDATE_MANUAL", True):
                     return self._json({"ok": False,
@@ -1162,6 +1187,27 @@ def _free_port(preferred: int) -> int:
     return 0
 
 
+def bootstrap(host: str = "0.0.0.0", port_pref: int = 8765,
+              reset_tmp: bool = False, local_only: bool = False):
+    """初始化数据目录 / 共享签名库并起 HTTP 服务（不阻塞）。
+    返回 (server, port, n_shared)；命令行与 exe 桌面窗口共用这一套。"""
+    global SERVER_PORT, HOST
+    if reset_tmp and os.path.isdir(TMP):
+        import shutil
+        shutil.rmtree(TMP, ignore_errors=True)
+    os.makedirs(PROJ, exist_ok=True)
+    os.makedirs(SEAL_DIR, exist_ok=True)
+    os.makedirs(DOC_DIR, exist_ok=True)
+    _doc_gc(7)
+    n_shared = _lib_load() + _lib_seed_from_assets()
+
+    HOST = "127.0.0.1" if local_only else (host or "0.0.0.0")
+    port = _free_port(port_pref)
+    SERVER_PORT = port
+    srv = ThreadingHTTPServer((HOST, port), Handler)
+    return srv, port, n_shared
+
+
 def main():
     ap = argparse.ArgumentParser(description="SignStudio —— PDF 电子签章可视化工具")
     ap.add_argument("--port", type=int, default=8765)
@@ -1175,21 +1221,6 @@ def main():
     ap.add_argument("--reset-tmp", action="store_true", help="清空临时签名缓存后启动")
     args = ap.parse_args()
 
-    global SERVER_PORT, HOST
-
-    if args.reset_tmp and os.path.isdir(TMP):
-        import shutil
-        shutil.rmtree(TMP, ignore_errors=True)
-    os.makedirs(PROJ, exist_ok=True)
-    os.makedirs(SEAL_DIR, exist_ok=True)
-    os.makedirs(DOC_DIR, exist_ok=True)
-    _doc_gc(7)
-    n_shared = _lib_load()
-    n_seed = _lib_seed_from_assets()
-    n_shared += n_seed
-
-    HOST = "127.0.0.1" if args.local_only else (args.host or "0.0.0.0")
-
     h = _health()
     if not h["ok"]:
         print("!" * 60)
@@ -1200,9 +1231,8 @@ def main():
         print(f'     "{h["executable"]}" -m pip install -r requirements.txt')
         print("!" * 60)
 
-    port = _free_port(args.port)
-    SERVER_PORT = port
-    srv = ThreadingHTTPServer((HOST, port), Handler)
+    srv, port, n_shared = bootstrap(host=args.host, port_pref=args.port,
+                                    reset_tmp=args.reset_tmp, local_only=args.local_only)
     url = f"http://127.0.0.1:{port}/"
     print("=" * 62)
     print(f"  SignStudio v{vmod.VERSION} 已启动")
@@ -1221,7 +1251,7 @@ def main():
     print(f"  共享签名库：{SEAL_DIR}（{n_shared} 张）  工程目录：{PROJ}")
     print("  关闭本窗口即退出")
     print("=" * 62)
-    if not args.no_update_check:
+    if not args.no_update_check and not FROZEN:
         # 启动时后台静默检查更新（不阻塞开界面，失败也不弹窗打扰）
         update_auto_check_async()
         print("  （已在后台检查更新，有新版本会在界面顶部提示）")

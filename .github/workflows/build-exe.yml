@@ -1,0 +1,98 @@
+name: build-exe
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "版本号（仅手动构建时用于产物命名）"
+        required: false
+        default: "dev"
+
+permissions:
+  contents: write
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller pywebview
+
+      - name: Smoke import
+        run: |
+          python -c "import signstudio, desktop, version; print('version', version.VERSION)"
+
+      - name: Build exe (windowed, embedded studio.html + assets)
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --name SignStudio `
+            --add-data "studio.html;." `
+            --add-data "assets;assets" `
+            --collect-all pymupdf `
+            --collect-all pikepdf `
+            --collect-all pyhanko `
+            --collect-all pyhanko_certvalidator `
+            --collect-all certvalidator `
+            --collect-all uharfbuzz `
+            --collect-all fontTools `
+            --collect-all webview `
+            --hidden-import tzlocal `
+            --hidden-import asn1crypto `
+            desktop.py
+
+      - name: Verify exe exists
+        run: |
+          if (!(Test-Path dist/SignStudio.exe)) { throw "exe 未生成" }
+          Get-Item dist/SignStudio.exe | Format-List Name,Length
+          (Get-FileHash dist/SignStudio.exe -Algorithm SHA256).Hash |
+            Out-File -Encoding ascii dist/SignStudio.exe.sha256
+
+      - name: Package (exe + 使用说明)
+        run: |
+          New-Item -ItemType Directory -Force -Path pkg | Out-Null
+          Copy-Item dist/SignStudio.exe pkg/
+          @"
+          SignStudio v${{ github.ref_name }} 打包版
+
+          1. 双击 SignStudio.exe：后台起服务并弹出工作台窗口（无控制台窗口）。
+          2. 局域网其他电脑用浏览器打开窗口里显示的 http://本机IP:8765/ 即可使用；
+             Windows 首次启动若弹防火墙，请勾选「专用网络」并允许。
+          3. 首次运行会在 exe 旁边创建 projects/、shared/、.studio_tmp/、logs/，
+             工程与签名都保存在这台电脑上；换目录时把这些文件夹一起带走即可。
+          4. 关闭窗口即退出程序。
+          "@ | Out-File -Encoding utf8 pkg/使用说明.txt
+          Copy-Item dist/SignStudio.exe.sha256 pkg/
+          Compress-Archive -Path pkg/* -DestinationPath "SignStudio-v${{ github.ref_name }}-win64.zip" -Force
+          Get-ChildItem *.zip, dist/SignStudio.exe | Format-Table Name,Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SignStudio-windows
+          path: |
+            dist/SignStudio.exe
+            SignStudio-v*-win64.zip
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/SignStudio.exe
+            SignStudio-v*-win64.zip
+            dist/SignStudio.exe.sha256
+          generate_release_notes: true

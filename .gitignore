@@ -1,5 +1,7 @@
 # 输出与临时文件
 out/
+build/
+*.spec
 *.pdf
 !examples/*.pdf
 .studio_tmp/
